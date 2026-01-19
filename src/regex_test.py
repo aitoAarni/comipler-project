@@ -1,8 +1,8 @@
 import re
 
-r = re.compile(r"hello +there!*?")
+r = re.compile(r'"[^"]*"')
 
-match = r.fullmatch("")
+match = r.fullmatch('"234"')
 
 print(match)
 
