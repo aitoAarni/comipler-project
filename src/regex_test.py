@@ -1,9 +1,10 @@
 import re
 
-r = re.compile(r"ab+c")
+r = re.compile(r"bro[\n|\t| ]+?")
 
-match = r.fullmatch('abbbbbbbbbbc')
+match = r.match("ro   ")
 
+print()
 print(match)
 
 search = r.search("the abc book, abbbbc!")
