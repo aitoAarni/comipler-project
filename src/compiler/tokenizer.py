@@ -19,14 +19,10 @@ def tokenizer(source_code: str="") -> list[str]:
     source_code_spaced =  " " + source_code + " "
     previous_match_end = 0
     tokens: list[str] = []
-    while (True):
-        match = r.search(source_code_spaced, previous_match_end)
-        if (not match): break
-        print("match:", match)
-
+    while (match := r.search(source_code_spaced, previous_match_end)):
+        
         previous_match_end = match.end() - 1
         tokens.append(match[0].strip())
-    print("break")
     return tokens
 
 if __name__ == "__main__":
