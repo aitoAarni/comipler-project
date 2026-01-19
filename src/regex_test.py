@@ -1,15 +1,15 @@
 import re
 
-r = re.compile(r'"[^"]*"')
+r = re.compile(r"ab+c")
 
-match = r.fullmatch('"234"')
+match = r.fullmatch('abbbbbbbbbbc')
 
 print(match)
 
-search = r.search("llo")
+search = r.search("the abc book, abbbbc!")
 
 print(search)
 
-findall = r.findall("Just a text hello! here to say 'llo' or helnah ! hell")
+findall = r.findall("the abc book, abbbbbc!")
 
 print(findall)
