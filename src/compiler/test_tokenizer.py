@@ -38,6 +38,9 @@ def test_tokenizes_operators():
     correct_result = create_tokens(
         "operator", "+", "-", "*", "\\", "%", "=", "==", "!=",
         "<", "<=", ">", ">="
-
     )
     assert tokenizer("+ -*\\ % = == != < <= > >=") == correct_result
+
+def test_tokenizes_punctuation():
+    correct_result = create_tokens("punctuation", "(")
+    assert tokenizer("(") == correct_result
