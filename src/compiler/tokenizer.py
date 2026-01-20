@@ -108,6 +108,5 @@ def get_regex_for_token(regex: str) -> str:
     return tokenizer_regexes[regex]
 
 
-
 if __name__ == "__main__":
     print(tokenizer("+"))
