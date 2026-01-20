@@ -17,12 +17,9 @@ def tokenizer(source_code: str="") -> list[str]:
     while (previous_match_end < len(source_code)):
         for regex in regular_expressions:
             match = regex.search(source_code, previous_match_end)
-            print("match:", match)
             if match and match.start() == previous_match_end:
-                print("match accepted")
                 previous_match_end = match.end()
                 if regex == white_space_re:
-                    print("in white space regex")
                     require_white_space_after = False
                 elif require_white_space_after:
                     raise Exception(f"Invalid syntax. Could not tokenize {source_code}")
