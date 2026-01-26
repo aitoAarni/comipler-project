@@ -28,29 +28,46 @@ def parse(tokens: list[Token]) -> ast.Expression:
         return token
 
     def parse_int_literal() -> ast.Literal:
-        print(peek())
-        if peek().type != 'int_literal':
-            raise Exception(f'{peek().location}: expected an integer literal')
+        if peek().type != "int_literal":
+            raise Exception(f"{peek().location}: expected an integer literal")
         token = consume()
         return ast.Literal(int(token.text))
 
-    # This is our main parsing function for this example.
-    # To parse "integer + integer" expressions,
-    # it uses `parse_int_literal` to parse the first integer,
-    # then it checks that there's a supported operator,
-    # and finally it uses `parse_int_literal` to parse the
-    # second integer.
+    def parse_identifier() -> ast.Identifier:
+        pass
+
+    def parse_term() -> ast.Expression:
+        if peek().type == "int_literal":
+            return parse_int_literal()
+        elif peek().type == "identifier":
+            return parse_identifier()
+        else:
+            raise Exception(
+                f"{peek().location}: expected an integer literal or an identifier"
+            )
+
     def parse_expression() -> ast.BinaryOp:
-        left = parse_int_literal()
-        operator_token = consume(['+', '-'])
-        right = parse_int_literal()
-        return ast.BinaryOp(
-            left,
-            operator_token.text,
-            right
-        )
+        left = parse_term()
+        while peek().text in ['+', '-']:
+            # Move past the '+' or '-'.
+            operator_token = consume()
+            operator = operator_token.text
+
+            # Parse the operator on the right.
+            right = parse_term()
+
+            # Combine it with the stuff we've
+            # accumulated on the left so far.
+            left = ast.BinaryOp(
+                left,
+                operator,
+                right
+            )
+        
+        return left
 
     return parse_expression()
+
 
 if __name__ == "__main__":
     tokens = tokenizer("2 + 2")
