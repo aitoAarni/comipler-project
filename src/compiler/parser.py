@@ -37,7 +37,7 @@ def parse(tokens: list[Token]) -> ast.Expression:
         if peek().type != "identifier":
             raise Exception(f"{peek().location}: expected a identifier (variable)")
         token = consume()
-        return ast.Literal(token.text)
+        return ast.Identifier(token.text)
 
     def parse_expression() -> ast.Expression:
         left = parse_term()
@@ -84,5 +84,6 @@ def parse(tokens: list[Token]) -> ast.Expression:
     return parse_expression()
 
 if __name__ == "__main__":
-    tokens = tokenizer("2 + 2")
+    tokens = tokenizer("a + a")
     parsed = parse(tokens)
+    print(parsed)
