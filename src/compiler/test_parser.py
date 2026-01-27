@@ -183,3 +183,18 @@ def test_function_call_multiple_args():
     )
     parsed = parse(tokens)
     assert parsed == correct_answer
+
+
+def test_invalid_function_syntax():
+    tokens = create_tokens(
+        ["f", t[1]], ["(", t[2]], [1, t[0]], [",", t[2]], [")", t[2]]
+    )
+    with pytest.raises(
+        Exception,
+        match='SourceLocation\\(line=0, column=0\\): expected "\\(", an integer literal or an identifier',
+    ):
+        parse(tokens)
+
+    tokens2 = create_tokens(["f", t[1]], ["(", t[2]], [1, t[0]])
+    with pytest.raises(Exception, match="SourceLocation\\(line=0, column=0\\): expected \"\\)\""):
+        parse(tokens2)
