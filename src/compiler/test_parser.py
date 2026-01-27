@@ -74,3 +74,11 @@ def test_parse_with_parenthesis():
 def test_empty_input_on_parser():
     parsed = parse([])
     assert parsed == None
+
+def test_invalid_operation():
+    tokens = create_tokens([2, t[0]], ["+", t[1]])
+    with pytest.raises(Exception, match=
+                       r"SourceLocation\(line=0, column=0\):"
+                       r" expected \"\(\", an integer literal or an identifier"
+                       ):
+        print(parse(tokens))
