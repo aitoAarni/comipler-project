@@ -87,6 +87,6 @@ def parse(tokens: list[Token]) -> ast.Expression:
     return expression
 
 if __name__ == "__main__":
-    tokens = tokenizer("a + a a")
+    tokens = tokenizer("a + a * 2")
     parsed = parse(tokens)
     print(parsed)

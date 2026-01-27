@@ -1,18 +1,20 @@
 import pytest
 from collections.abc import Sequence
 from compiler.tokenizer import Token, SourceLocation
-from compiler.parser import parse 
+from compiler.parser import parse
 import compiler.custom_ast as ast
 
 t = ["int_literal", "identifier"]
 
+
 def create_tokens(*token_args: Sequence[str | int]) -> list[Token]:
-    tokens = [] 
+    tokens = []
     for args in token_args:
         token = Token(str(args[0]), args[1], SourceLocation(0, 0))
         token.location._testing = True
         tokens.append(token)
     return tokens
+
 
 def get_tokens() -> list[Token]:
     tokens = [
@@ -24,26 +26,38 @@ def get_tokens() -> list[Token]:
         token.location._testing = True
     return tokens
 
+
 def test_parse_plus_operation():
     one = ast.Literal(1)
-    expression = ast.BinaryOp(one, "+", one )
+    expression = ast.BinaryOp(one, "+", one)
     tokens = create_tokens([1, t[0]], ["+", t[1]], [1, t[0]])
     print(tokens)
     parsed = parse(tokens)
     assert parsed == expression
+
 
 def test_operators_work_with_variables():
     a = ast.Identifier("a")
     correct_expression = ast.BinaryOp(a, "+", a)
     tokens = create_tokens(["a", t[1]], ["+", t[1]], ["a", t[1]])
     parsed = parse(tokens)
-    
+
     assert parsed == correct_expression
+
 
 def test_wrong_syntax_throws_error():
     tokens = create_tokens(["a", t[1]], ["+", t[1]], ["a", t[1]], ["a", t[1]])
     tokens[3].location.line = 1
     tokens[3].location.column = 4
     with pytest.raises(Exception, match=rf"Invalid syntax at \(1, 4\)"):
-        parsed = parse(tokens)
-        print(parsed)
+        parse(tokens)
+
+
+def test_parse_term():
+    a = ast.Identifier("a")
+    tokens = create_tokens(
+        ["a", t[1]], ["+", t[1]], ["a", t[1]], ["*", t[1]], [2, t[0]]
+    )
+    correct_expresion = ast.BinaryOp(a, "+", ast.BinaryOp(a, "*", ast.Literal(2)))
+    parsed = parse(tokens)
+    assert parsed == correct_expresion
