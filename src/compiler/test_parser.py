@@ -105,16 +105,17 @@ def test_ternary_operator_with_else():
     )
     parsed = parse(tokens)
     assert parsed == right_answer
-# def test_ternary_operator_2():
-#     expr1 = ast.BinaryOp(ast.Literal(2), "-", ast.Identifier("a"))
-#     expr2 = ast.BinaryOp(ast.Literal(3), "+", ast.Literal(4))
-#     expr3 = ast.Identifier("b")
-#     correct_answer = ast.TernaryOp(expr1, expr2, expr3)
 
-#     tokens = create_tokens(
-#         ["if", t[1]], ["2", t[0]], ["+", t[1]], ["a", t[1]],
-#         ["then", t[1]], [3, t[0]], ["+", t[1]], [4, t[0]],
-#         ["else", t[1]], ["b", t[1]]
-#     )
-#     parsed = parse(tokens)
-#     assert parsed == correct_answer
+def test_ternary_operator_expressions():
+    expr1 = ast.BinaryOp(ast.Literal(2), "-", ast.Identifier("a"))
+    expr2 = ast.BinaryOp(ast.Literal(3), "+", ast.Literal(4))
+    expr3 = ast.Identifier("b")
+    correct_answer = ast.TernaryOp(expr1, expr2, expr3)
+
+    tokens = create_tokens(
+        ["if", t[1]], ["2", t[0]], ["-", t[1]], ["a", t[1]],
+        ["then", t[1]], [3, t[0]], ["+", t[1]], [4, t[0]],
+        ["else", t[1]], ["b", t[1]]
+    )
+    parsed = parse(tokens)
+    assert parsed == correct_answer
