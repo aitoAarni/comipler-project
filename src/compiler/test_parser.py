@@ -4,7 +4,7 @@ from compiler.tokenizer import Token, SourceLocation
 from compiler.parser import parse
 import compiler.custom_ast as ast
 
-t = ["int_literal", "identifier"]
+t = ["int_literal", "identifier", "punctuation"]
 
 
 def create_tokens(*token_args: Sequence[str | int]) -> list[Token]:
@@ -59,5 +59,15 @@ def test_parse_term():
         ["a", t[1]], ["+", t[1]], ["a", t[1]], ["*", t[1]], [2, t[0]]
     )
     correct_expresion = ast.BinaryOp(a, "+", ast.BinaryOp(a, "*", ast.Literal(2)))
+    parsed = parse(tokens)
+    assert parsed == correct_expresion
+
+def test_parse_with_parenthesis():
+    a = ast.Identifier("a")
+    tokens = create_tokens(
+        ["(", t[2]],["a", t[1]], ["+", t[1]], ["a", t[1]], [")", t[2]],
+        ["*", t[1]], [2, t[0]] 
+    )
+    correct_expresion = ast.BinaryOp(ast.BinaryOp(a, "+", a), "*", ast.Literal(2))
     parsed = parse(tokens)
     assert parsed == correct_expresion
