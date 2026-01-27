@@ -47,7 +47,7 @@ def parse(tokens: list[Token]) -> ast.Expression:
         left = parse_term()
         while peek().text in ['+', '-']:
             operator_token = consume()
-            operator = operator_token.text
+            operator = ast.Operator(operator_token.text)
             right = parse_term()
             left = ast.BinaryOp(
                 left,
@@ -60,7 +60,7 @@ def parse(tokens: list[Token]) -> ast.Expression:
         left = parse_factor()
         while peek().text in ['*', '/']:
             operator_token = consume()
-            operator = operator_token.text
+            operator = ast.Operator(operator_token.text)
             right = parse_factor()
             left = ast.BinaryOp(
                 left,

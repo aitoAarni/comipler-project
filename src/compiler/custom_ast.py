@@ -13,6 +13,10 @@ class Identifier(Expression):
     name: str
 
 @dataclass
+class Operator(Expression):
+    symbol: str
+
+@dataclass
 class BinaryOp(Expression):
     """AST node for a binary operation like `A + B`"""
     left: Expression

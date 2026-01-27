@@ -29,7 +29,7 @@ def get_tokens() -> list[Token]:
 
 def test_parse_plus_operation():
     one = ast.Literal(1)
-    expression = ast.BinaryOp(one, "+", one)
+    expression = ast.BinaryOp(one, ast.Operator("+"), one)
     tokens = create_tokens([1, t[0]], ["+", t[1]], [1, t[0]])
     print(tokens)
     parsed = parse(tokens)
@@ -38,7 +38,7 @@ def test_parse_plus_operation():
 
 def test_operators_work_with_variables():
     a = ast.Identifier("a")
-    correct_expression = ast.BinaryOp(a, "+", a)
+    correct_expression = ast.BinaryOp(a, ast.Operator("+"), a)
     tokens = create_tokens(["a", t[1]], ["+", t[1]], ["a", t[1]])
     parsed = parse(tokens)
 
@@ -58,7 +58,9 @@ def test_parse_term():
     tokens = create_tokens(
         ["a", t[1]], ["+", t[1]], ["a", t[1]], ["*", t[1]], [2, t[0]]
     )
-    correct_expresion = ast.BinaryOp(a, "+", ast.BinaryOp(a, "*", ast.Literal(2)))
+    correct_expresion = ast.BinaryOp(
+        a, ast.Operator("+"), ast.BinaryOp(a, ast.Operator("*"), ast.Literal(2))
+    )
     parsed = parse(tokens)
     assert parsed == correct_expresion
 
@@ -74,7 +76,9 @@ def test_parse_with_parenthesis():
         ["*", t[1]],
         [2, t[0]],
     )
-    correct_expresion = ast.BinaryOp(ast.BinaryOp(a, "+", a), "*", ast.Literal(2))
+    correct_expresion = ast.BinaryOp(
+        ast.BinaryOp(a, ast.Operator("+"), a), ast.Operator("*"), ast.Literal(2)
+    )
     parsed = parse(tokens)
     assert parsed == correct_expresion
 
@@ -117,11 +121,11 @@ def test_ternary_operator_with_else():
 
 
 def test_ternary_operator_expressions():
-    expr1 = ast.BinaryOp(ast.Literal(2), "-", ast.Identifier("a"))
-    expr2 = ast.BinaryOp(ast.Literal(3), "+", ast.Literal(4))
+    expr1 = ast.BinaryOp(ast.Literal(2), ast.Operator("-"), ast.Identifier("a"))
+    expr2 = ast.BinaryOp(ast.Literal(3), ast.Operator("+"), ast.Literal(4))
     expr3 = ast.Identifier("b")
     correct_answer = ast.BinaryOp(
-        ast.Literal(2), "*", ast.TernaryOp(expr1, expr2, expr3)
+        ast.Literal(2), ast.Operator("*"), ast.TernaryOp(expr1, expr2, expr3)
     )
 
     tokens = create_tokens(
