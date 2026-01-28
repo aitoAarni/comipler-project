@@ -60,7 +60,27 @@ class Parser:
         return ast.FunctionCall(identifier, args)
 
     def parse_expression(self) -> ast.Expression:
-        return self.parse_level_6()
+        return self.parse_level_1()
+
+    def parse_level_1(self):
+        left = self.parse_level_2()
+        return left
+
+    def parse_level_2(self):
+        left = self.parse_level_3()
+        return left
+
+    def parse_level_3(self):
+        left = self.parse_level_4()
+        return left
+
+    def parse_level_4(self):
+        left = self.parse_level_5()
+        return left
+
+    def parse_level_5(self):
+        left = self.parse_level_6()
+        return left
 
     def parse_level_6(self):
         left = self.parse_level_7()
@@ -113,6 +133,7 @@ class Parser:
         if not bool(self.tokens):
             return None
         expression = self.parse_expression()
+        print(expression)
         if self.pos != self.token_length:
             loc = self.peek().location
             raise Exception(f"Invalid syntax at ({loc.line}, {loc.column})")
