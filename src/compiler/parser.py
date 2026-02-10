@@ -174,7 +174,7 @@ class Parser:
         body = self.parse_expression()
         return ast.WhileStatement(cond, body)
 
-    def parse_var_declaration(self) -> ast.Variable:
+    def parse_var_declaration(self) -> ast.VariableDeclaration:
         if not self.allow_var_declaration:
             raise Exception(
                 'Error "var" is only allowed directy inside blocks {} and '
@@ -186,7 +186,7 @@ class Parser:
             raise Exception(f"Variable must be of type identifier")
         self.consume("=")
         initializer = self.parse_expression()
-        return ast.Variable(identifier, initializer)
+        return ast.VariableDeclaration(identifier, initializer)
 
     def parse_parenthesized(self) -> ast.Expression:
         self.consume("(")
@@ -239,19 +239,7 @@ def check_is_identifier(expression: ast.Expression, Error_msg=None) -> None:
 
 if __name__ == "__main__":
     tokens = tokenizer(
-        """{
-        while f() do {
-                    x = 10;
-                    y = if g(x) then {
-                        x = x + 1;
-                        x
-                    } else {
-                        g(x)
-                    };
-                    g(y);
-                };
-                123
-                }
+        """var a = 2
                 """
     )
     parsed = parse(tokens)

@@ -438,7 +438,7 @@ def test_block_where_missin_semicolon():
 
 
 def test_parse_var():
-    correct_answer = ast.Variable(ast.Identifier("x"), ast.Literal(1))
+    correct_answer = ast.VariableDeclaration(ast.Identifier("x"), ast.Literal(1))
     tokens = create_tokens(["var", t[1]], ["x", t[1]], ["=", t[3]], ["1", t[0]])
     parsed = parse(tokens)
     assert parsed == correct_answer
@@ -466,7 +466,7 @@ def test_function_as_var_throws():
 
 def test_declare_var_inside_block():
     correct_answer = ast.TernaryOp(
-        ast.Literal(1), ast.Block([], ast.Variable(ast.Identifier("x"), ast.Literal(1)))
+        ast.Literal(1), ast.Block([], ast.VariableDeclaration(ast.Identifier("x"), ast.Literal(1)))
     )
     tokens = create_tokens(
         ["if", t[1]],
@@ -500,4 +500,3 @@ def test_allow_var_declaration_in_block_or_top_level():
         "in top-level expressions",
     ):
         parse(tokens)
-

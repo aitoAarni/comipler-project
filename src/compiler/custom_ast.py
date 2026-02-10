@@ -71,7 +71,7 @@ class Block(Expression):
     result_expression: Expression = field(default_factory=lambda:  Literal(None))
 
 @dataclass
-class Variable(Expression):
+class VariableDeclaration(Expression):
     identifier: Identifier
     initializer: Expression
     
