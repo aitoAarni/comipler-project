@@ -10,6 +10,8 @@ class Parser:
         self.tokens = tokens
         self.pos = 0
         self.token_length = len(tokens)
+        # allow only on top-level or in inside blocks {}
+        self.allow_var_declaration = False
 
     def peek(self) -> Token:
         if self.pos < self.token_length:
@@ -64,9 +66,12 @@ class Parser:
         self.consume(")")
         return ast.FunctionCall(identifier, args if args else None)
 
-    def parse_expression(self) -> ast.Expression:
-
-        return self.parse_level_1()
+    def parse_expression(self, allow_var_declaration: bool = False) -> ast.Expression:
+        initial_state = self.allow_var_declaration
+        self.allow_var_declaration = allow_var_declaration
+        expression = self.parse_level_1()
+        self.allow_var_declaration = initial_state
+        return expression
 
     def parse_binary_operator(
         self,
@@ -142,6 +147,7 @@ class Parser:
 
     def parse_keyword(self):
         if self.peek().text == "if":
+            parse
             return self.parse_if_statement()
         elif self.peek().text == "while":
             return self.parse_while_statement()
@@ -169,6 +175,11 @@ class Parser:
         return ast.WhileStatement(cond, body)
 
     def parse_var_declaration(self) -> ast.Variable:
+        if not self.allow_var_declaration:
+            raise Exception(
+                'Error "var" is only allowed directy inside blocks {} and '
+                "in top-level expressions"
+            )
         self.consume("var")
         identifier = self.parse_identifier()
         if type(identifier) != ast.Identifier:
@@ -188,7 +199,7 @@ class Parser:
         statements: list[ast.Expression] = []
         result_expression = None
         while self.peek().text != "}":
-            statement = self.parse_expression()
+            statement = self.parse_expression(True)
             next_token = self.peek().text
             if next_token == "}":
                 result_expression = statement
@@ -205,7 +216,7 @@ class Parser:
     def parse(self):
         if not bool(self.tokens):
             return None
-        expression = self.parse_expression()
+        expression = self.parse_expression(True)
         if self.pos != self.token_length:
             loc = self.peek().location
             raise Exception(

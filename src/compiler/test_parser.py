@@ -456,7 +456,7 @@ def test_keyword_as_var_throws():
             parse(tokens)
 
 
-def test_keyword_as_var_throws():
+def test_function_as_var_throws():
     tokens = create_tokens(
         ["var", t[1]], ["f", t[1]], ["(", t[2]], [")", t[2]], ["=", t[3]], ["1", t[0]]
     )
@@ -481,3 +481,23 @@ def test_declare_var_inside_block():
     )
     parsed = parse(tokens)
     assert parsed == correct_answer
+
+
+def test_allow_var_declaration_in_block_or_top_level():
+
+    tokens = create_tokens(
+        ["if", t[1]],
+        ["1", t[0]],
+        ["then", t[1]],
+        ["var", t[1]],
+        ["x", t[1]],
+        ["=", t[3]],
+        ["1", t[0]],
+    )
+    with pytest.raises(
+        Exception,
+        match='Error "var" is only allowed directy inside blocks {} and '
+        "in top-level expressions",
+    ):
+        parse(tokens)
+
