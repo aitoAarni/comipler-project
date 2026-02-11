@@ -2,7 +2,11 @@ from compiler.tokenizer import Token
 from compiler.tokenizer import tokenizer
 import compiler.custom_ast as ast
 from collections.abc import Callable
-from compiler.utils import get_keywords
+from compiler.utils import (
+    get_keywords,
+    conditional_ends_with_block,
+    convert_boolean_literal,
+)
 
 
 class Parser:
@@ -38,7 +42,11 @@ class Parser:
         if self.peek().type != "int_literal":
             raise Exception(f"{self.peek().location}: expected an integer literal")
         token = self.consume()
-        return ast.Literal(int(token.text))
+        return ast.Literal(
+            int(token.text)
+            if token.text.isnumeric()
+            else convert_boolean_literal(token.text)
+        )
 
     def parse_identifier(self) -> ast.Identifier | ast.Expression:
         if self.peek().type != "identifier":
@@ -195,7 +203,6 @@ class Parser:
         return expr
 
     def parse_block(self) -> ast.Block:
-        # {{a} {b}}
         self.consume("{")
         statements: list[ast.Expression] = []
         result_expression = None
@@ -219,7 +226,13 @@ class Parser:
                     result_expression = ast.Block([], nested_block)
             else:
                 statements.append(statement)
-                self.consume(";")
+                if not issubclass(type(statement), ast.ConditionalStatement):
+                    print(
+                        f"statement: {statement}, is conidiontal statement: {issubclass(type(statement), ast.ConditionalStatement)}"
+                    )
+                    self.consume(";")
+                elif not conditional_ends_with_block(statement) or next_token == ";":
+                    self.consume(";")
 
         self.consume("}")
         return ast.Block(
@@ -251,6 +264,6 @@ def check_is_identifier(expression: ast.Expression, Error_msg=None) -> None:
 
 
 if __name__ == "__main__":
-    tokens = tokenizer(r"{ { a } { b }; }")
+    tokens = tokenizer(r"{ if false then { a } else { b } c }")
     parsed = parse(tokens)
     print(parsed)

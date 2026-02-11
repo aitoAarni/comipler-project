@@ -512,11 +512,26 @@ def test_code_block_without_semicolon():
     parsed = parse(tokens)
     assert parsed == correct_answer
 
+
 def test_nested_blocks():
     correct_answer = ast.Block(
-        [ast.Block([], ast.Identifier("a")), ast.Block([], ast.Identifier("b"))], 
-        ast.Literal(None)
+        [ast.Block([], ast.Identifier("a")), ast.Block([], ast.Identifier("b"))],
+        ast.Literal(None),
     )
     tokens = tokenizer("{ { a } { b }; }")
+    parsed = parse(tokens)
+    assert parsed == correct_answer
+
+
+def test_nested_blocks_with_ternary_operator():
+    correct_answer = ast.Block(
+        [ast.TernaryOp(
+            ast.Literal(True),
+            ast.Block([], ast.Identifier("a")),
+            ast.Block([], ast.Identifier("b")),
+        )],
+        ast.Identifier("c"),
+    )
+    tokens = tokenizer("{ if true then { a } else { b } c }")
     parsed = parse(tokens)
     assert parsed == correct_answer

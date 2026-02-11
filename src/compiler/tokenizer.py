@@ -37,8 +37,8 @@ def tokenize_line(source_code: str, line_number: int) -> list[Token]:
     comment_re = re.compile(comment)
 
     regular_expressions = [
-        identifier_re,
         int_literal_re,
+        identifier_re,
         white_space_re,
         operator_re,
         punctuation_re,
@@ -102,7 +102,7 @@ def tokenize_line(source_code: str, line_number: int) -> list[Token]:
 def get_regex_for_token(regex: str) -> str:
     tokenizer_regexes = {
         "identifier": r"[a-zA-Z|_][a-zA-Z|_|0-9]*",
-        "int_literal": r"[0-9]+",
+        "int_literal": r"[0-9]+|true|false",
         "white_space": r"[\n|\t| ]+",
         "operator": r"\+|-|\*|\\|%|==|!=|=|<=|>=|<|>",
         "punctuation": r"\(|\)|\{|\}|,|;",
@@ -110,13 +110,15 @@ def get_regex_for_token(regex: str) -> str:
     }
     return tokenizer_regexes[regex]
 
-def tokenizer(source_code: str=""):
+
+def tokenizer(source_code: str = ""):
     tokens = []
     lines = source_code.split("\n")
     for i, line in enumerate(lines):
         line_tokens = tokenize_line(line, i + 1)
         tokens.extend(line_tokens)
     return tokens
+
 
 if __name__ == "__main__":
     print(tokenizer())
