@@ -4,6 +4,7 @@ from compiler.tokenizer import Token, SourceLocation
 from compiler.parser import parse
 import compiler.custom_ast as ast
 from compiler.utils import get_keywords
+from compiler.tokenizer import tokenizer
 
 t = ["int_literal", "identifier", "punctuation", "operator"]
 
@@ -466,7 +467,8 @@ def test_function_as_var_throws():
 
 def test_declare_var_inside_block():
     correct_answer = ast.TernaryOp(
-        ast.Literal(1), ast.Block([], ast.VariableDeclaration(ast.Identifier("x"), ast.Literal(1)))
+        ast.Literal(1),
+        ast.Block([], ast.VariableDeclaration(ast.Identifier("x"), ast.Literal(1))),
     )
     tokens = create_tokens(
         ["if", t[1]],
@@ -500,3 +502,21 @@ def test_allow_var_declaration_in_block_or_top_level():
         "in top-level expressions",
     ):
         parse(tokens)
+
+
+def test_code_block_without_semicolon():
+    correct_answer = ast.Block(
+        [ast.Block([], ast.Identifier("a"))], ast.Block([], ast.Identifier("b"))
+    )
+    tokens = tokenizer("{ { a } { b } }")
+    parsed = parse(tokens)
+    assert parsed == correct_answer
+
+def test_nested_blocks():
+    correct_answer = ast.Block(
+        [ast.Block([], ast.Identifier("a")), ast.Block([], ast.Identifier("b"))], 
+        ast.Literal(None)
+    )
+    tokens = tokenizer("{ { a } { b }; }")
+    parsed = parse(tokens)
+    assert parsed == correct_answer

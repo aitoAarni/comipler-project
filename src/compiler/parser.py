@@ -195,6 +195,7 @@ class Parser:
         return expr
 
     def parse_block(self) -> ast.Block:
+        # {{a} {b}}
         self.consume("{")
         statements: list[ast.Expression] = []
         result_expression = None
@@ -204,6 +205,18 @@ class Parser:
             if next_token == "}":
                 result_expression = statement
                 break
+            elif next_token == "{":
+                statements.append(statement)
+                self.consume("{")
+                nested_block = self.parse_expression(True)
+                self.consume("}")
+                next_token = self.peek().text
+                if next_token != "}":
+                    statements.append(ast.Block([], nested_block))
+                    if next_token == ";":
+                        self.consume(";")
+                else:
+                    result_expression = ast.Block([], nested_block)
             else:
                 statements.append(statement)
                 self.consume(";")
@@ -238,9 +251,6 @@ def check_is_identifier(expression: ast.Expression, Error_msg=None) -> None:
 
 
 if __name__ == "__main__":
-    tokens = tokenizer(
-        """var a = 2
-                """
-    )
+    tokens = tokenizer(r"{ { a } { b }; }")
     parsed = parse(tokens)
     print(parsed)
