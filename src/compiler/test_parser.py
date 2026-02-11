@@ -535,3 +535,8 @@ def test_nested_blocks_with_ternary_operator():
     tokens = tokenizer("{ if true then { a } else { b } c }")
     parsed = parse(tokens)
     assert parsed == correct_answer
+
+def test_missing_semicolons_in_blocks_throws():
+    tokens = tokenizer("{ if true then { a } b c }")
+    with pytest.raises(Exception, match="SourceLocation\\(line=1, column=24\\): expected \";\""):
+        parse(tokens)

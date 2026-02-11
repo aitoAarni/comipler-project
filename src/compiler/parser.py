@@ -227,9 +227,6 @@ class Parser:
             else:
                 statements.append(statement)
                 if not issubclass(type(statement), ast.ConditionalStatement):
-                    print(
-                        f"statement: {statement}, is conidiontal statement: {issubclass(type(statement), ast.ConditionalStatement)}"
-                    )
                     self.consume(";")
                 elif not conditional_ends_with_block(statement) or next_token == ";":
                     self.consume(";")
@@ -264,6 +261,6 @@ def check_is_identifier(expression: ast.Expression, Error_msg=None) -> None:
 
 
 if __name__ == "__main__":
-    tokens = tokenizer(r"{ if false then { a } else { b } c }")
+    tokens = tokenizer(r"{ if true then { a } b c }")
     parsed = parse(tokens)
     print(parsed)
