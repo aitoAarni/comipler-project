@@ -1,6 +1,7 @@
 from compiler.tokenizer import Token
 from compiler.tokenizer import tokenizer
 import compiler.custom_ast as ast
+from compiler.location import SourceLocation as Loc
 from collections.abc import Callable
 from compiler.utils import (
     get_keywords,
@@ -43,9 +44,12 @@ class Parser:
             raise Exception(f"{self.peek().location}: expected an integer literal")
         token = self.consume()
         return ast.Literal(
-            int(token.text)
-            if token.text.isnumeric()
-            else convert_boolean_literal(token.text)
+            (
+                int(token.text)
+                if token.text.isnumeric()
+                else convert_boolean_literal(token.text)
+            ),
+            token.location.new(),
         )
 
     def parse_identifier(self) -> ast.Identifier | ast.Expression:
@@ -56,7 +60,7 @@ class Parser:
         elif self.peek().text in get_keywords():
             return self.parse_keyword()
         token = self.consume()
-        identifier = ast.Identifier(token.text)
+        identifier = ast.Identifier(token.text, token.location.new())
         if self.peek().text == "(":
             return self.parse_function_call(identifier)
         return identifier
@@ -93,7 +97,7 @@ class Parser:
             if left_operand_check:
                 left_operand_check(left_operand)
             operator_token = self.consume(operators)
-            operator = ast.Operator(operator_token.text)
+            operator = ast.Operator(operator_token.text, operator_token.location.new())
             if left_associative:
                 right_operand = next_func()
             else:
@@ -133,7 +137,7 @@ class Parser:
     def parse_level_8(self) -> ast.Expression:
         if self.peek().text in ["not", "-"]:
             operator_token = self.consume(["not", "-"])
-            operator = ast.Operator(operator_token.text)
+            operator = ast.Operator(operator_token.text, operator_token.location.new())
             right = self.parse_level_8()
             return ast.UnaryOp(operator, right)
         else:
@@ -261,6 +265,6 @@ def check_is_identifier(expression: ast.Expression, Error_msg=None) -> None:
 
 
 if __name__ == "__main__":
-    tokens = tokenizer(r"{ if true then { a } b c }")
+    tokens = tokenizer("{ { a } { b } }")
     parsed = parse(tokens)
     print(parsed)

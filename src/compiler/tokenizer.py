@@ -1,17 +1,6 @@
 import re
 from dataclasses import dataclass, field
-
-
-@dataclass
-class SourceLocation:
-    line: int
-    column: int
-    _testing: bool = field(default=False, init=False, repr=False)
-
-    def __eq__(self, other):
-        if self._testing or other._testing:
-            return True
-        return (self.line, self.column) == (other.line, other.column)
+from compiler.location import SourceLocation
 
 
 @dataclass

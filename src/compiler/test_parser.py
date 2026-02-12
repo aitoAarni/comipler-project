@@ -7,7 +7,8 @@ from compiler.utils import get_keywords
 from compiler.tokenizer import tokenizer
 
 t = ["int_literal", "identifier", "punctuation", "operator"]
-
+loc_stub = SourceLocation(None, None)
+loc_stub._testing = True
 
 def create_tokens(*token_args: Sequence[str | int]) -> list[Token]:
     tokens = []
@@ -83,7 +84,7 @@ def test_invalid_operation():
     tokens = create_tokens([2, t[0]], ["+", t[3]])
     with pytest.raises(
         Exception,
-        match=r"SourceLocation\(line=0, column=0\):"
+        match=r"\(0, 0\):"
         r" expected \"\(\", an integer literal or an identifier",
     ):
         print(parse(tokens))
@@ -193,13 +194,13 @@ def test_invalid_function_syntax():
     )
     with pytest.raises(
         Exception,
-        match='SourceLocation\\(line=0, column=0\\): expected "\\(", an integer literal or an identifier',
+        match=r'\(0, 0\): expected "\(", an integer literal or an identifier',
     ):
         parse(tokens)
 
     tokens2 = create_tokens(["f", t[1]], ["(", t[2]], [1, t[0]])
     with pytest.raises(
-        Exception, match='SourceLocation\\(line=0, column=0\\): expected "\\)"'
+        Exception, match=r'\(0, 0\): expected "\)"'
     ):
         parse(tokens2)
 
@@ -433,7 +434,7 @@ def test_block_where_missin_semicolon():
         ["}", t[2]],
     )
     with pytest.raises(
-        Exception, match=r"SourceLocation\(line=0, column=0\): expected \";\""
+        Exception, match=r"\(0, 0\): expected \";\""
     ):
         parse(tokens)
 
@@ -452,7 +453,7 @@ def test_keyword_as_var_throws():
         tokens = create_tokens(["var", t[1]], [keyword, t[1]], ["=", t[3]], ["1", t[0]])
         with pytest.raises(
             Exception,
-            match=r"SourceLocation\(line=0, column=0\): expected \"\(\", an integer literal or an identifier",
+            match=r"\(0, 0\): expected \"\(\", an integer literal or an identifier",
         ):
             parse(tokens)
 
@@ -506,7 +507,7 @@ def test_allow_var_declaration_in_block_or_top_level():
 
 def test_code_block_without_semicolon():
     correct_answer = ast.Block(
-        [ast.Block([], ast.Identifier("a"))], ast.Block([], ast.Identifier("b"))
+        [ast.Block([], ast.Identifier("a", loc_stub))], ast.Block([], ast.Identifier("b", loc_stub))
     )
     tokens = tokenizer("{ { a } { b } }")
     parsed = parse(tokens)
@@ -515,7 +516,7 @@ def test_code_block_without_semicolon():
 
 def test_nested_blocks():
     correct_answer = ast.Block(
-        [ast.Block([], ast.Identifier("a")), ast.Block([], ast.Identifier("b"))],
+        [ast.Block([], ast.Identifier("a", loc_stub)), ast.Block([], ast.Identifier("b", loc_stub))],
         ast.Literal(None),
     )
     tokens = tokenizer("{ { a } { b }; }")
@@ -526,11 +527,11 @@ def test_nested_blocks():
 def test_nested_blocks_with_ternary_operator():
     correct_answer = ast.Block(
         [ast.TernaryOp(
-            ast.Literal(True),
-            ast.Block([], ast.Identifier("a")),
-            ast.Block([], ast.Identifier("b")),
+            ast.Literal(True, loc_stub),
+            ast.Block([], ast.Identifier("a", loc_stub)),
+            ast.Block([], ast.Identifier("b", loc_stub)),
         )],
-        ast.Identifier("c"),
+        ast.Identifier("c", loc_stub),
     )
     tokens = tokenizer("{ if true then { a } else { b } c }")
     parsed = parse(tokens)
@@ -538,5 +539,6 @@ def test_nested_blocks_with_ternary_operator():
 
 def test_missing_semicolons_in_blocks_throws():
     tokens = tokenizer("{ if true then { a } b c }")
-    with pytest.raises(Exception, match="SourceLocation\\(line=1, column=24\\): expected \";\""):
+    with pytest.raises(Exception, match=r"\(1, 24\): expected \";\""):
         parse(tokens)
+
