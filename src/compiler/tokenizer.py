@@ -1,13 +1,13 @@
 import re
 from dataclasses import dataclass, field
-from compiler.location import SourceLocation
+from compiler.location import Location
 
 
 @dataclass
 class Token:
     text: str
     type: str
-    location: SourceLocation
+    location: Location
 
 
 def tokenize_line(source_code: str, line_number: int) -> list[Token]:
@@ -55,21 +55,21 @@ def tokenize_line(source_code: str, line_number: int) -> list[Token]:
                     token = Token(
                         match[0],
                         "identifier",
-                        SourceLocation(line_number, match.start() + 1),
+                        Location(line_number, match.start() + 1),
                     )
                     tokens.append(token)
                 elif regex == operator_re:
                     token = Token(
                         match[0],
                         "operator",
-                        SourceLocation(line_number, match.start() + 1),
+                        Location(line_number, match.start() + 1),
                     )
                     tokens.append(token)
                 elif regex == punctuation_re:
                     token = Token(
                         match[0],
                         "punctuation",
-                        SourceLocation(line_number, match.start() + 1),
+                        Location(line_number, match.start() + 1),
                     )
                     tokens.append(token)
 
@@ -78,7 +78,7 @@ def tokenize_line(source_code: str, line_number: int) -> list[Token]:
                     token = Token(
                         match[0],
                         "int_literal",
-                        SourceLocation(line_number, match.start() + 1),
+                        Location(line_number, match.start() + 1),
                     )
                     tokens.append(token)
                 break

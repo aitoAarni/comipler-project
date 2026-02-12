@@ -2,13 +2,13 @@ from dataclasses import dataclass, field
 
 
 @dataclass
-class SourceLocation:
+class Location:
     line: int | None = None
     column: int | None = None
     _testing: bool = field(default=False, init=False, repr=False)
 
     def new(self):
-        new_source_location = SourceLocation(self.line, self.column)
+        new_source_location = Location(self.line, self.column)
         new_source_location._testing = self._testing
         return new_source_location
 

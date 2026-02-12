@@ -1,10 +1,10 @@
 import pytest
-from .tokenizer import tokenizer, Token, SourceLocation
+from .tokenizer import tokenizer, Token, Location
 
 def create_tokens(token_type: str, *values) -> list[Token]:
     lis: list[Token] = []
     for value in values:
-        location = SourceLocation(0, 0)
+        location = Location(0, 0)
         location._testing = True
         lis.append(Token(
             value if type(value) == str else str(value) , token_type, location

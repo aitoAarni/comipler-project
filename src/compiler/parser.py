@@ -1,7 +1,7 @@
 from compiler.tokenizer import Token
 from compiler.tokenizer import tokenizer
 import compiler.custom_ast as ast
-from compiler.location import SourceLocation as Loc
+from compiler.location import Location as Loc
 from collections.abc import Callable
 from compiler.utils import (
     get_keywords,
@@ -44,12 +44,12 @@ class Parser:
             raise Exception(f"{self.peek().location}: expected an integer literal")
         token = self.consume()
         return ast.Literal(
+            token.location.new(),
             (
                 int(token.text)
                 if token.text.isnumeric()
                 else convert_boolean_literal(token.text)
             ),
-            token.location.new(),
         )
 
     def parse_identifier(self) -> ast.Identifier | ast.Expression:
@@ -60,7 +60,7 @@ class Parser:
         elif self.peek().text in get_keywords():
             return self.parse_keyword()
         token = self.consume()
-        identifier = ast.Identifier(token.text, token.location.new())
+        identifier = ast.Identifier(token.location.new(), token.text)
         if self.peek().text == "(":
             return self.parse_function_call(identifier)
         return identifier
@@ -76,7 +76,9 @@ class Parser:
                     break
                 self.consume(",")
         self.consume(")")
-        return ast.FunctionCall(identifier, args if args else None)
+        return ast.FunctionCall(
+            identifier.location.new(), identifier, args if args else None
+        )
 
     def parse_expression(self, allow_var_declaration: bool = False) -> ast.Expression:
         initial_state = self.allow_var_declaration
@@ -97,12 +99,14 @@ class Parser:
             if left_operand_check:
                 left_operand_check(left_operand)
             operator_token = self.consume(operators)
-            operator = ast.Operator(operator_token.text, operator_token.location.new())
+            operator = ast.Operator(operator_token.location.new(), operator_token.text)
             if left_associative:
                 right_operand = next_func()
             else:
                 right_operand = self.parse_expression()
-            left_operand = ast.BinaryOp(left_operand, operator, right_operand)
+            left_operand = ast.BinaryOp(
+                operator.location.new(), left_operand, operator, right_operand
+            )
         return left_operand
 
     def parse_level_1(self) -> ast.Expression:
@@ -137,9 +141,9 @@ class Parser:
     def parse_level_8(self) -> ast.Expression:
         if self.peek().text in ["not", "-"]:
             operator_token = self.consume(["not", "-"])
-            operator = ast.Operator(operator_token.text, operator_token.location.new())
+            operator = ast.Operator(operator_token.location.new(), operator_token.text)
             right = self.parse_level_8()
-            return ast.UnaryOp(operator, right)
+            return ast.UnaryOp(operator.location.new(), operator, right)
         else:
             return self.parse_level_9()
 
@@ -177,14 +181,14 @@ class Parser:
         if self.peek().text == "else":
             self.consume("else")
             else_ = self.parse_expression()
-        return ast.TernaryOp(if_, then_, else_)
+        return ast.TernaryOp(if_.location.new(), if_, then_, else_)
 
     def parse_while_statement(self) -> ast.WhileStatement:
         self.consume("while")
         cond = self.parse_expression()
         self.consume("do")
         body = self.parse_expression()
-        return ast.WhileStatement(cond, body)
+        return ast.WhileStatement(cond.location.new(), cond, body)
 
     def parse_var_declaration(self) -> ast.VariableDeclaration:
         if not self.allow_var_declaration:
@@ -198,7 +202,9 @@ class Parser:
             raise Exception(f"Variable must be of type identifier")
         self.consume("=")
         initializer = self.parse_expression()
-        return ast.VariableDeclaration(identifier, initializer)
+        return ast.VariableDeclaration(
+            identifier.location.new(), identifier, initializer
+        )
 
     def parse_parenthesized(self) -> ast.Expression:
         self.consume("(")
@@ -209,7 +215,7 @@ class Parser:
     def parse_block(self) -> ast.Block:
         self.consume("{")
         statements: list[ast.Expression] = []
-        result_expression = None
+        result_expression = ast.Literal(Loc(), None)
         while self.peek().text != "}":
             statement = self.parse_expression(True)
             next_token = self.peek().text
@@ -223,11 +229,15 @@ class Parser:
                 self.consume("}")
                 next_token = self.peek().text
                 if next_token != "}":
-                    statements.append(ast.Block([], nested_block))
+                    statements.append(
+                        ast.Block(nested_block.location.new(), [], nested_block)
+                    )
                     if next_token == ";":
                         self.consume(";")
                 else:
-                    result_expression = ast.Block([], nested_block)
+                    result_expression = ast.Block(
+                        nested_block.location.new(), [], nested_block
+                    )
             else:
                 statements.append(statement)
                 if not issubclass(type(statement), ast.ConditionalStatement):
@@ -237,7 +247,7 @@ class Parser:
 
         self.consume("}")
         return ast.Block(
-            statements, result_expression if result_expression else ast.Literal(None)
+            result_expression.location.new(), statements, result_expression
         )
 
     def parse(self):
@@ -265,6 +275,6 @@ def check_is_identifier(expression: ast.Expression, Error_msg=None) -> None:
 
 
 if __name__ == "__main__":
-    tokens = tokenizer("{ { a } { b } }")
+    tokens = tokenizer("{a;}")
     parsed = parse(tokens)
     print(parsed)
