@@ -41,7 +41,7 @@ def convert_boolean_literal(literal: str):
 if __name__ == "__main__":
     from compiler.tokenizer import tokenizer
     from compiler.parser import parse
-    tokens = "if {a} then if b then a else while a do b"
+    tokens = "{a = {a} b}"
     parsed = parse(tokenizer(tokens))
     print(parsed)
 

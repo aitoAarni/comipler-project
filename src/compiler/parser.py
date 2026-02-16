@@ -5,7 +5,6 @@ from compiler.location import Location as Loc
 from collections.abc import Callable
 from compiler.utils import (
     get_keywords,
-    # conditional_ends_with_block,
     expression_ends_with_block,
     convert_boolean_literal,
 )
@@ -251,9 +250,7 @@ class Parser:
                     )
             else:
                 statements.append(statement)
-                if not issubclass(type(statement), ast.ConditionalStatement):
-                    self.consume(";")
-                elif not expression_ends_with_block(statement) or next_token == ";":
+                if not expression_ends_with_block(statement) or next_token == ";":
                     self.consume(";")
         return result_expression.location.new(), statements, result_expression
 
@@ -282,6 +279,6 @@ def check_is_identifier(expression: ast.Expression, Error_msg=None) -> None:
 
 
 if __name__ == "__main__":
-    tokens = tokenizer("var a = {b}")
+    tokens = tokenizer("{a = {a} b}")
     parsed = parse(tokens)
     print(parsed)

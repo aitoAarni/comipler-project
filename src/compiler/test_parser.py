@@ -577,14 +577,14 @@ def test_missing_semicolons_in_blocks_throws():
         parse(tokens)
 
 
-# def test_block_assignment():
-#     correct_answer = Block(
-#         [BinaryOp(Identifier("a"), Operator("="), Block([], Identifier("a")))],
-#         Identifier("b"),
-#     )
-#     tokens = tokenizer("{a = {a} b}")
-#     parsed = parse(tokens)
-#     assert parsed == correct_answer
+def test_block_assignment():
+    correct_answer = Block(
+        [BinaryOp(Identifier("a"), Operator("="), Block([], Identifier("a")))],
+        Identifier("b"),
+    )
+    tokens = tokenizer("{a = {a} b}")
+    parsed = parse(tokens)
+    assert parsed == correct_answer
 
 
 # def test_multiple_top_level_expressions():
