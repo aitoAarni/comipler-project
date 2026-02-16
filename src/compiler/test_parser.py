@@ -575,3 +575,10 @@ def test_missing_semicolons_in_blocks_throws():
     tokens = tokenizer("{ if true then { a } b c }")
     with pytest.raises(Exception, match=r"\(1, 24\): expected \";\""):
         parse(tokens)
+
+# def test_multiple_top_level_expressions():
+#     correct_answer = Block([Identifier("a"), Identifier("b")], Identifier("c"))
+#     tokens = tokenizer("a; b; c")
+#     parsed = parse(tokens)
+#     assert parsed == correct_answer
+

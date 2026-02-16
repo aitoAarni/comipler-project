@@ -214,6 +214,13 @@ class Parser:
 
     def parse_block(self) -> ast.Block:
         self.consume("{")
+        location, statements, result_expression = self.parse_inside_block()
+        self.consume("}")
+        return ast.Block(
+            location, statements, result_expression
+        )
+
+    def parse_inside_block(self):
         statements: list[ast.Expression] = []
         result_expression = ast.Literal(Loc(), None)
         while self.peek().text != "}":
@@ -244,11 +251,7 @@ class Parser:
                     self.consume(";")
                 elif not conditional_ends_with_block(statement) or next_token == ";":
                     self.consume(";")
-
-        self.consume("}")
-        return ast.Block(
-            result_expression.location.new(), statements, result_expression
-        )
+        return result_expression.location.new(), statements, result_expression
 
     def parse(self):
         if not bool(self.tokens):
@@ -275,6 +278,6 @@ def check_is_identifier(expression: ast.Expression, Error_msg=None) -> None:
 
 
 if __name__ == "__main__":
-    tokens = tokenizer("{a;}")
+    tokens = tokenizer("a; b")
     parsed = parse(tokens)
     print(parsed)
