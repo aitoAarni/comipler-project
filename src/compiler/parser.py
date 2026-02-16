@@ -5,7 +5,8 @@ from compiler.location import Location as Loc
 from collections.abc import Callable
 from compiler.utils import (
     get_keywords,
-    conditional_ends_with_block,
+    # conditional_ends_with_block,
+    expression_ends_with_block,
     convert_boolean_literal,
 )
 
@@ -79,6 +80,11 @@ class Parser:
         return ast.FunctionCall(
             identifier.location.new(), identifier, args if args else None
         )
+
+    def parse_top_level(self):
+        while True:
+            pass 
+        # return ast.Block(location, statements, return_expression)
 
     def parse_expression(self, allow_var_declaration: bool = False) -> ast.Expression:
         initial_state = self.allow_var_declaration
@@ -216,9 +222,7 @@ class Parser:
         self.consume("{")
         location, statements, result_expression = self.parse_inside_block()
         self.consume("}")
-        return ast.Block(
-            location, statements, result_expression
-        )
+        return ast.Block(location, statements, result_expression)
 
     def parse_inside_block(self):
         statements: list[ast.Expression] = []
@@ -249,7 +253,7 @@ class Parser:
                 statements.append(statement)
                 if not issubclass(type(statement), ast.ConditionalStatement):
                     self.consume(";")
-                elif not conditional_ends_with_block(statement) or next_token == ";":
+                elif not expression_ends_with_block(statement) or next_token == ";":
                     self.consume(";")
         return result_expression.location.new(), statements, result_expression
 
@@ -278,6 +282,6 @@ def check_is_identifier(expression: ast.Expression, Error_msg=None) -> None:
 
 
 if __name__ == "__main__":
-    tokens = tokenizer("a; b")
+    tokens = tokenizer("var a = {b}")
     parsed = parse(tokens)
     print(parsed)

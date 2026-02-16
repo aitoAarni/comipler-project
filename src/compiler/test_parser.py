@@ -576,9 +576,19 @@ def test_missing_semicolons_in_blocks_throws():
     with pytest.raises(Exception, match=r"\(1, 24\): expected \";\""):
         parse(tokens)
 
+
+# def test_block_assignment():
+#     correct_answer = Block(
+#         [BinaryOp(Identifier("a"), Operator("="), Block([], Identifier("a")))],
+#         Identifier("b"),
+#     )
+#     tokens = tokenizer("{a = {a} b}")
+#     parsed = parse(tokens)
+#     assert parsed == correct_answer
+
+
 # def test_multiple_top_level_expressions():
 #     correct_answer = Block([Identifier("a"), Identifier("b")], Identifier("c"))
 #     tokens = tokenizer("a; b; c")
 #     parsed = parse(tokens)
 #     assert parsed == correct_answer
-
