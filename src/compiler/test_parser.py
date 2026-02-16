@@ -87,7 +87,7 @@ def test_wrong_syntax_throws_error():
     tokens = create_tokens(["a", t[1]], ["+", t[3]], ["a", t[1]], ["a", t[1]])
     tokens[3].location.line = 1
     tokens[3].location.column = 4
-    with pytest.raises(Exception, match=rf"Invalid syntax at \(1, 4\)"):
+    with pytest.raises(Exception, match=r'\(1, 4\): expected ";"'):
         parse(tokens)
 
 
@@ -587,8 +587,8 @@ def test_block_assignment():
     assert parsed == correct_answer
 
 
-# def test_multiple_top_level_expressions():
-#     correct_answer = Block([Identifier("a"), Identifier("b")], Identifier("c"))
-#     tokens = tokenizer("a; b; c")
-#     parsed = parse(tokens)
-#     assert parsed == correct_answer
+def test_multiple_top_level_expressions():
+    correct_answer = Block([Identifier("a"), Identifier("b")], Identifier("c"))
+    tokens = tokenizer("a; b; c")
+    parsed = parse(tokens)
+    assert parsed == correct_answer

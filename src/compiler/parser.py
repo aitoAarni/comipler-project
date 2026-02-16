@@ -81,9 +81,19 @@ class Parser:
         )
 
     def parse_top_level(self):
-        while True:
-            pass 
-        # return ast.Block(location, statements, return_expression)
+        statements = []
+        result_expression = ast.Literal(None, None)
+        while self.peek().type != "end":
+            expression = self.parse_expression(True)
+            if self.peek().type == "end":
+                result_expression = expression
+                break
+            statements.append(expression)
+            if not expression_ends_with_block(expression) or self.peek().text == ";":
+                self.consume(";")
+        if not statements:
+            return result_expression
+        return ast.Block(result_expression.location.new(), statements, result_expression)
 
     def parse_expression(self, allow_var_declaration: bool = False) -> ast.Expression:
         initial_state = self.allow_var_declaration
@@ -257,7 +267,7 @@ class Parser:
     def parse(self):
         if not bool(self.tokens):
             return None
-        expression = self.parse_expression(True)
+        expression = self.parse_top_level()
         if self.pos != self.token_length:
             loc = self.peek().location
             raise Exception(
