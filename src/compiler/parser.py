@@ -82,7 +82,7 @@ class Parser:
 
     def parse_top_level(self):
         statements = []
-        result_expression = ast.Literal(None, None)
+        result_expression = ast.Literal(Loc(), None)
         while self.peek().type != "end":
             expression = self.parse_expression(True)
             if self.peek().type == "end":
@@ -289,6 +289,6 @@ def check_is_identifier(expression: ast.Expression, Error_msg=None) -> None:
 
 
 if __name__ == "__main__":
-    tokens = tokenizer("{a = {a} b}")
+    tokens = tokenizer("var a = {a}; {c} {a};")
     parsed = parse(tokens)
     print(parsed)

@@ -588,7 +588,7 @@ def test_block_assignment():
 
 
 def test_multiple_top_level_expressions():
-    correct_answer = Block([Identifier("a"), Identifier("b")], Identifier("c"))
-    tokens = tokenizer("a; b; c")
+    correct_answer = Block([Identifier("a"), Block([Identifier("b")])], Identifier("c"))
+    tokens = tokenizer("a; {b;}; c")
     parsed = parse(tokens)
     assert parsed == correct_answer
