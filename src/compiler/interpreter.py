@@ -18,7 +18,6 @@ def interpret(node: ast.Expression, symbol_table: SymTab) -> Value:
             symbol_name = "unary_" + node.op.symbol
             operator_function = symbol_table.get_symbol(symbol_name)
             return operator_function(a)
-
         case ast.BinaryOp():
             a: Any = interpret(node.left, symbol_table)
             b: Any = interpret(node.right, symbol_table)
@@ -32,16 +31,25 @@ def interpret(node: ast.Expression, symbol_table: SymTab) -> Value:
                 return operator_function(a, b)
 
         case ast.TernaryOp():
-            if interpret(node.cond):
-                return interpret(node.then_)
+            if interpret(node.cond, symbol_table):
+                return interpret(node.then_, symbol_table)
             else:
-                return interpret(node.else_)
+                return interpret(node.else_, symbol_table)
 
         case ast.VariableDeclaration():
             identifier: Any = node.identifier.name
             value: Any = interpret(node.initializer, symbol_table)
             symbol_table.add_symbol(identifier, value)
             return value
+
+        case ast.FunctionCall():
+            function_name = node.function_name.name
+            func = symbol_table.get_symbol(function_name)
+            evaluated = []
+            for arg in node.args or []:
+                value = interpret(arg, symbol_table)
+                evaluated.append(value)
+            return func(*evaluated)
 
         case ast.Block():
             statements = node.statements
@@ -54,7 +62,7 @@ def interpret(node: ast.Expression, symbol_table: SymTab) -> Value:
 
 if __name__ == "__main__":
 
-    code = "not true"
+    code = "if 0 then 2+2 else 5 *2"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     symbol_table = create_top_level_symbol_table()

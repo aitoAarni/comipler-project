@@ -47,6 +47,8 @@ def create_top_level_symbol_table():
     st.add_symbol(">=", o.ge)
     st.add_symbol("and", lambda a, b: a and b)
     st.add_symbol("or", lambda a, b: a or b)
+    st.add_symbol("print_int", print)
+    st.add_symbol("print_bool", print)
     return st
     
 
