@@ -8,6 +8,11 @@ class SymTab:
     def add_symbol(self, identifier, value):
         self.symbols[identifier] = value
 
+    def update_symbol(self, identifier, value):
+        if identifier in self.symbols:
+            return self.add_symbol(identifier, value)
+        raise Exception(f"'{identifier}' is not assignable in this scope")
+
     def get_symbol(self, symbol: str):
         if symbol in self.symbols:
             return self.symbols[symbol]

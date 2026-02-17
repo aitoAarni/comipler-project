@@ -42,7 +42,7 @@ class BinaryOp(Expression):
     """AST node for a binary operation like `A + B`"""
 
     left: Expression
-    op: Expression
+    op: Operator
     right: Expression
 
 
