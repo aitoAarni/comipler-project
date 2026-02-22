@@ -34,3 +34,11 @@ def test_variable_declaration(type_table: SymTab):
 def test_block_statement_type(type_table: SymTab):
     parsed = create_ast("32; {32; true}")
     assert typecheck(parsed, type_table) == Bool
+
+def test_variable_type(type_table: SymTab):
+    parsed = create_ast("var x = false; 2; x")
+    assert typecheck(parsed, type_table) == Bool
+
+def test_assignmnent_type(type_table: SymTab):
+    parsed = create_ast("var x = 3; x = 45")
+    assert typecheck(parsed, type_table) == Unit
