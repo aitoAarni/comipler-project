@@ -12,6 +12,8 @@ class SymTab:
     def update_symbol(self, identifier, value):
         if identifier in self.symbols:
             return self.add_symbol(identifier, value)
+        elif self.parent:
+            return self.parent.update_symbol(value)
         raise Exception(f"'{identifier}' is not assignable in this scope")
 
     def get_symbol(self, symbol: str):

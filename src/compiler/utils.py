@@ -1,5 +1,5 @@
 import compiler.custom_ast as ast
-from compiler.synmbol_table import SymTab
+from compiler.symbol_table import SymTab
 import operator as o
 from compiler.types import FunType, Int, Bool, Unit
 

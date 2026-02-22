@@ -2,7 +2,7 @@ from compiler.types import Int, Bool, Unit, FunType, PrimitiveType
 from compiler.tokenizer import tokenizer
 from compiler.parser import parse
 import compiler.custom_ast as ast
-from compiler.synmbol_table import SymTab
+from compiler.symbol_table import SymTab
 from compiler.utils import create_top_level_type_symbol_table
 
 
@@ -73,7 +73,7 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
 
 
 if __name__ == "__main__":
-    code = "var x = 0; x != 3"
+    code = "var x = 2; {x + 2}"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()

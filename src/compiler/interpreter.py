@@ -3,7 +3,7 @@ from typing import Any
 import compiler.custom_ast as ast
 from compiler.tokenizer import tokenizer
 from compiler.parser import parse
-from compiler.synmbol_table import SymTab
+from compiler.symbol_table import SymTab
 from compiler.utils import create_top_level_variable_symbol_table
 
 type Value = int | bool | None

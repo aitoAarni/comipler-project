@@ -4,7 +4,7 @@ from compiler.parser import parse
 from compiler.tokenizer import tokenizer
 import compiler.custom_ast as ast
 from compiler.utils import create_top_level_type_symbol_table
-from compiler.synmbol_table import SymTab
+from compiler.symbol_table import SymTab
 from compiler.types import Int, Bool, Unit
 
 @pytest.fixture
@@ -47,3 +47,7 @@ def test_wrong_scope_throws(type_table: SymTab):
     parsed = create_ast("{var x = 2}; x + 2")
     with pytest.raises(Exception, match="There is no variable 'x' declared"):
         typecheck(parsed, type_table)
+
+def test_nested_variable_works(type_table: SymTab):
+    parsed = create_ast("var x = 2; {x + 2}")
+    assert typecheck(parsed, type_table) == Int
