@@ -8,7 +8,7 @@ from compiler.synmbol_table import SymTab
 from compiler.types import Int, Bool, Unit
 
 @pytest.fixture
-def type_table():
+def type_table() -> SymTab:
     return create_top_level_type_symbol_table()
 
 def create_ast(text: str) -> ast.Expression:
@@ -18,6 +18,19 @@ def create_ast(text: str) -> ast.Expression:
 
 
 
-def test_int_check(type_table):
+def test_int_type(type_table: SymTab):
     parsed = create_ast("328")
     assert typecheck(parsed, type_table) == Int
+
+def test_bool_type(type_table: SymTab):
+    parsed = create_ast("false")
+    assert typecheck(parsed, type_table) == Bool
+
+def test_variable_declaration(type_table: SymTab):
+    parsed = create_ast("var x = 4")
+    typecheck(parsed, type_table)
+    assert type_table.get_symbol("x") == Int
+
+def test_block_statement_type(type_table: SymTab):
+    parsed = create_ast("32; {32; true}")
+    assert typecheck(parsed, type_table) == Bool
