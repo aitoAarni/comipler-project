@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+
 class SymTab:
-    def __init__(self, parent: SymTab = None):
+    def __init__(self, parent: SymTab | None = None):
         self.symbols = {}
         self.parent = parent
 
@@ -17,7 +18,7 @@ class SymTab:
         if symbol in self.symbols:
             return self.symbols[symbol]
         elif self.parent:
-            return self.parent.get_symbol(symbol) 
+            return self.parent.get_symbol(symbol)
         else:
             raise Exception(f"There is no variable '{symbol}' declared")
 

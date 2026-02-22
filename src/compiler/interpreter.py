@@ -4,7 +4,7 @@ import compiler.custom_ast as ast
 from compiler.tokenizer import tokenizer
 from compiler.parser import parse
 from compiler.synmbol_table import SymTab
-from compiler.utils import create_top_level_symbol_table
+from compiler.utils import create_top_level_variable_symbol_table
 
 type Value = int | bool | None
 
@@ -65,6 +65,6 @@ if __name__ == "__main__":
     code = "if 0 then 2+2 else 5 *2"
     tokens = tokenizer(code)
     parsed = parse(tokens)
-    symbol_table = create_top_level_symbol_table()
+    symbol_table = create_top_level_variable_symbol_table()
     interpreted = interpret(parsed, symbol_table)
     print(f"interpreted value: {interpreted}")

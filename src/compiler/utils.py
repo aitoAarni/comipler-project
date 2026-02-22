@@ -57,7 +57,7 @@ def create_top_level_variable_symbol_table():
     return st
 
 
-def create_top_level_type_symbol_table():
+def create_top_level_type_symbol_table() -> SymTab:
     st = SymTab()
     st.add_symbol("unary_-", FunType([Int], Int))
     st.add_symbol("unary_not", FunType([bool], Bool))
@@ -74,6 +74,7 @@ def create_top_level_type_symbol_table():
     st.add_symbol("or", FunType([Bool, Bool], Bool))
     st.add_symbol("print_int", FunType([Int], Unit))
     st.add_symbol("print_bool", FunType([Bool], Unit))
+    return st
 
 
 def convert_boolean_literal(literal: str):
