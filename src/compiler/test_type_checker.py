@@ -42,3 +42,8 @@ def test_variable_type(type_table: SymTab):
 def test_assignmnent_type(type_table: SymTab):
     parsed = create_ast("var x = 3; x = 45")
     assert typecheck(parsed, type_table) == Unit
+
+def test_wrong_scope_throws(type_table: SymTab):
+    parsed = create_ast("{var x = 2}; x + 2")
+    with pytest.raises(Exception, match="There is no variable 'x' declared"):
+        typecheck(parsed, type_table)
