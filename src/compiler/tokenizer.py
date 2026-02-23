@@ -93,7 +93,7 @@ def get_regex_for_token(regex: str) -> str:
         "identifier": r"[a-zA-Z|_][a-zA-Z|_|0-9]*",
         "int_literal": r"[0-9]+|true|false",
         "white_space": r"[\n|\t| ]+",
-        "operator": r"\+|-|\*|\\|%|==|!=|=|<=|>=|<|>",
+        "operator": r"\+|-|\*|/|%|==|!=|=|<=|>=|<|>",
         "punctuation": r"\(|\)|\{|\}|,|;",
         "comment": r"(//|#)[^\n]*",
     }
@@ -110,4 +110,5 @@ def tokenizer(source_code: str = ""):
 
 
 if __name__ == "__main__":
-    print(tokenizer())
+    code = "2 / 3"
+    print(tokenizer(code))
