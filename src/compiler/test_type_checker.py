@@ -100,6 +100,26 @@ def test_unary_operation_type(type_table: SymTab):
     ):
         typecheck(parsed, type_table)
 
+
 def test_ternary_operation_type(type_table: SymTab):
     parsed = create_ast("if 2 != 4 then 3 else 4")
     assert typecheck(parsed, type_table) == Int
+
+
+def test_ternary_operation_with_one_branch(type_table: SymTab):
+    parsed = create_ast("if 2 != 4 then false")
+    assert typecheck(parsed, type_table) == Bool
+
+
+def test_ternary_operator_with_1_branch(type_table: SymTab):
+    parsed = create_ast("if 2 != 4 then false")
+    assert typecheck(parsed, type_table) == Bool
+
+
+def test_ternary_opeartor_thorws_with_different_return_types(type_table: SymTab):
+    parsed = create_ast("var x = 1; if 2 != 4 then false else x = 3")
+    with pytest.raises(
+        Exception,
+        match=r"Error: If statement's else and then branch return values don't match Bool != None",
+    ):
+        typecheck(parsed, type_table)
