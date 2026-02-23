@@ -79,4 +79,10 @@ def test_function_call_throws_w_too_many_args(type_table: SymTab):
         typecheck(create_ast("print_int(2, 2)"), type_table)
 
 
+def test_function_call_throws_w_wrong_args(type_table: SymTab):
+    with pytest.raises(
+        Exception,
+        match=r"Error: function print_int expected paremater type Int, but got instead Bool: Literal\(location=\(1, 11\), value=True\).",
+    ):
+        typecheck(create_ast("print_int(true)"), type_table)
 # def test_unary_operation:

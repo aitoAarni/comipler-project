@@ -76,8 +76,8 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
                 if function.arg_types[i] == arg_type:
                     continue
                 raise Exception(
-                    f"Error: function expected paremater type {function.arg_types[i]}"
-                    ", but got instead {arg_type}: {arg}."
+                    f"Error: function {node.function_name.name} expected paremater type {function.arg_types[i]}"
+                    f", but got instead {arg_type}: {arg}."
                 )
             return function.return_type
 
