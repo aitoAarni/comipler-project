@@ -99,3 +99,7 @@ def test_unary_operation_type(type_table: SymTab):
         match=r"Error: argument to operator not must be of type Bool, but was of type Int",
     ):
         typecheck(parsed, type_table)
+
+def test_ternary_operation_type(type_table: SymTab):
+    parsed = create_ast("if 2 != 4 then 3 else 4")
+    assert typecheck(parsed, type_table) == Int

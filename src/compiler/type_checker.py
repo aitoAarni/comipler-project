@@ -62,15 +62,17 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
                 return function.return_type
 
         case ast.TernaryOp():
-            pass
-            # t1 = typecheck(node.condition, type_table)
-            # if t1 is not Bool:
-            #     raise ...
-            # t2 = typecheck(node.then_branch, type_table)
-            # t3 = typecheck(node.else_branch, type_table)
-            # if t2 != t3:
-            #     raise ...
-            # return t2
+            t1 = typecheck(node.cond, type_table)
+            if t1 is not Bool:
+                raise Exception(f"Error: condition {node.cond} is not {Bool}")
+            t2 = typecheck(node.then_, type_table)
+            t3 = typecheck(node.else_, type_table)
+            if t2 != t3:
+                raise Exception(
+                    f"Error: {node} else and then branch return values"
+                    f" don't match {t2} != {t3}"
+                )
+            return t2
 
         case ast.FunctionCall():
             args = node.args
