@@ -37,10 +37,10 @@ def test_throws_error_on_invalid_identifiers() -> None:
 
 def test_tokenizes_operators():
     correct_result = create_tokens(
-        "operator", "+", "-", "*", "\\", "%", "=", "==", "!=",
+        "operator", "+", "-", "*", "/", "%", "=", "==", "!=",
         "<", "<=", ">", ">="
     )
-    assert tokenizer("+ -*\\ % = == != < <= > >=") == correct_result
+    assert tokenizer("+ -*/ % = == != < <= > >=") == correct_result
 
 def test_tokenizes_punctuation():
     correct_result = create_tokens("punctuation", "(", "{", "}", ")", ",", ";")

@@ -49,7 +49,7 @@ def test_wrong_scope_throws(type_table: SymTab):
         typecheck(parsed, type_table)
 
 def test_nested_variable_works(type_table: SymTab):
-    parsed = create_ast("var x = 2; {var b = x; x + 2; {x + b + 2}}")
+    parsed = create_ast("var x = 2; {var b = x; x / 2; {x + b + 2}}")
     assert typecheck(parsed, type_table) == Int
 
 def test_binary_opeartor_types(type_table: SymTab):

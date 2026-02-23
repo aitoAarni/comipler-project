@@ -26,12 +26,12 @@ def tokenize_line(source_code: str, line_number: int) -> list[Token]:
     comment_re = re.compile(comment)
 
     regular_expressions = [
+        comment_re,
         int_literal_re,
         identifier_re,
         white_space_re,
         operator_re,
         punctuation_re,
-        comment_re,
     ]
     previous_match_end = 0
     tokens: list[str] = []
