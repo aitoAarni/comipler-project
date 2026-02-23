@@ -123,3 +123,7 @@ def test_ternary_opeartor_thorws_with_different_return_types(type_table: SymTab)
         match=r"Error: If statement's else and then branch return values don't match Bool != None",
     ):
         typecheck(parsed, type_table)
+
+def test_while_statement_type(type_table: SymTab):
+    parsed = create_ast("while true do {12 % 6}")
+    assert typecheck(parsed, type_table) == Int

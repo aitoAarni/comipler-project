@@ -78,6 +78,13 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
                 )
             return t2
 
+        case ast.WhileStatement():
+            t1 = typecheck(node.cond, type_table)
+            if t1 is not Bool:
+                raise Exception(f"Error: condition {node.cond} is not {Bool}")
+            t2 = typecheck(node.body, type_table)
+            return t2
+
         case ast.FunctionCall():
             args = node.args
             function = type_table.get_symbol(node.function_name.name)
