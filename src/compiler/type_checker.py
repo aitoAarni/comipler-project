@@ -66,13 +66,18 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
         case ast.FunctionCall():
             args = node.args
             function = type_table.get_symbol(node.function_name.name)
+            if len(args) > len(function.arg_types):
+                raise Exception(
+                    f"Error: function {node.function_name.name} takes "
+                    f"{len(function.arg_types)} argument(s), but {len(args)} were given."
+                )
             for i, arg in enumerate(args):
                 arg_type = typecheck(arg, type_table)
                 if function.arg_types[i] == arg_type:
                     continue
                 raise Exception(
                     f"Error: function expected paremater type {function.arg_types[i]}"
-                    ", but got instead {arg_type}: {arg}"
+                    ", but got instead {arg_type}: {arg}."
                 )
             return function.return_type
 
