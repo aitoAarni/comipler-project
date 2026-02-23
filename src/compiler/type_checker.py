@@ -26,6 +26,15 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
             value = typecheck(node.initializer, type_table)
             type_table.add_symbol(variable, value)
             return Unit
+        case ast.UnaryOp():
+            operand = typecheck(node.right, type_table)
+            function = type_table.get_symbol("unary_" + node.op.symbol)
+            if operand != function.arg_types[0]:
+                raise Exception(
+                    f"Error: argument to operator {node.op.symbol} must be of type"
+                    f" {function.arg_types[0]}, but was of type {operand}"
+                )
+            return function.return_type
 
         case ast.BinaryOp():
             t1 = typecheck(node.left, type_table)
@@ -90,7 +99,7 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
 
 
 if __name__ == "__main__":
-    code = "var x = 2; {x + 2}"
+    code = "not 20"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()

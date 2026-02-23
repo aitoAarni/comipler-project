@@ -60,7 +60,7 @@ def create_top_level_variable_symbol_table():
 def create_top_level_type_symbol_table() -> SymTab:
     st = SymTab()
     st.add_symbol("unary_-", FunType([Int], Int))
-    st.add_symbol("unary_not", FunType([bool], Bool))
+    st.add_symbol("unary_not", FunType([Bool], Bool))
     st.add_symbol("+", FunType([Int, Int], Int))
     st.add_symbol("-", FunType([Int, Int], Int))
     st.add_symbol("*", FunType([Int, Int], Int))

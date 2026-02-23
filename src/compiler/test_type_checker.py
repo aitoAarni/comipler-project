@@ -85,4 +85,17 @@ def test_function_call_throws_w_wrong_args(type_table: SymTab):
         match=r"Error: function print_int expected paremater type Int, but got instead Bool: Literal\(location=\(1, 11\), value=True\).",
     ):
         typecheck(create_ast("print_int(true)"), type_table)
-# def test_unary_operation:
+
+
+def test_unary_operation_type(type_table: SymTab):
+    parsed = create_ast("-1")
+    assert typecheck(parsed, type_table) == Int
+
+
+def test_unary_operation_type(type_table: SymTab):
+    parsed = create_ast("not 20")
+    with pytest.raises(
+        Exception,
+        match=r"Error: argument to operator not must be of type Bool, but was of type Int",
+    ):
+        typecheck(parsed, type_table)
