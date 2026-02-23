@@ -56,6 +56,6 @@ def test_binary_opeartor_types(type_table: SymTab):
     lt = create_ast("(1 < 3) == false")
     assert typecheck(lt, type_table) == Bool
 
-# def test_function_call_type(type_table: SymTab):
-#     parsed = create_ast("print_int(2, 3, 4)")
-#     assert typecheck(parsed, type_table) == Unit
+def test_function_call_type(type_table: SymTab):
+    parsed = create_ast("print_int(2)")
+    assert typecheck(parsed, type_table) == Unit

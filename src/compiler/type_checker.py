@@ -20,7 +20,7 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
         case ast.Identifier():
             identifier_type = type_table.get_symbol(node.name)
             return identifier_type
-            
+
         case ast.VariableDeclaration():
             variable = node.identifier.name
             value = typecheck(node.initializer, type_table)
@@ -62,12 +62,20 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
             # if t2 != t3:
             #     raise ...
             # return t2
-        
+
         case ast.FunctionCall():
             args = node.args
             function = type_table.get_symbol(node.function_name.name)
+            for i, arg in enumerate(args):
+                arg_type = typecheck(arg, type_table)
+                if function.arg_types[i] == arg_type:
+                    continue
+                raise Exception(
+                    f"Error: function expected paremater type {function.arg_types[i]}"
+                    ", but got instead {arg_type}: {arg}"
+                )
+            return function.return_type
 
-        
         case ast.Block():
             statements = node.statements
             nested_type_table = SymTab(type_table)
