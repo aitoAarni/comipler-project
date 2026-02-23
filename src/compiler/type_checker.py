@@ -63,6 +63,10 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
             #     raise ...
             # return t2
         
+        case ast.FunctionCall():
+            args = node.args
+            function = type_table.get_symbol(node.function_name.name)
+
         
         case ast.Block():
             statements = node.statements

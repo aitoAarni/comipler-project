@@ -44,10 +44,18 @@ def test_assignmnent_type(type_table: SymTab):
     assert typecheck(parsed, type_table) == Unit
 
 def test_wrong_scope_throws(type_table: SymTab):
-    parsed = create_ast("{var x = 2}; x + 2")
+    parsed = create_ast("{var x = 2}; x * 2")
     with pytest.raises(Exception, match="There is no variable 'x' declared"):
         typecheck(parsed, type_table)
 
 def test_nested_variable_works(type_table: SymTab):
     parsed = create_ast("var x = 2; {var b = x; x + 2; {x + b + 2}}")
     assert typecheck(parsed, type_table) == Int
+
+def test_binary_opeartor_types(type_table: SymTab):
+    lt = create_ast("(1 < 3) == false")
+    assert typecheck(lt, type_table) == Bool
+
+# def test_function_call_type(type_table: SymTab):
+#     parsed = create_ast("print_int(2, 3, 4)")
+#     assert typecheck(parsed, type_table) == Unit
