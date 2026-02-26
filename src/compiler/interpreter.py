@@ -9,7 +9,7 @@ from compiler.utils import create_top_level_variable_symbol_table
 type Value = int | bool | None
 
 
-def interpret(node: ast.Expression, symbol_table: SymTab) -> Value:
+def interpret(node: ast.Expression | None, symbol_table: SymTab) -> Value:
     match node:
         case ast.Literal():
             return node.value
@@ -19,16 +19,20 @@ def interpret(node: ast.Expression, symbol_table: SymTab) -> Value:
             operator_function = symbol_table.get_symbol(symbol_name)
             return operator_function(a)
         case ast.BinaryOp():
-            a: Any = interpret(node.left, symbol_table)
+            a1: Any = interpret(node.left, symbol_table)
             b: Any = interpret(node.right, symbol_table)
             operator = node.op.symbol
             if operator == "=":
+                if not isinstance(node.left, ast.Identifier):
+                    raise Exception(
+                        f"Error: assignment only works with variables, "
+                        f"you tried to assign to {node.left}")
                 variable = node.left.name
-                value = interpret(node.right, symbol_table)
-                symbol_table.update_symbol(variable, value)
+                value1 = interpret(node.right, symbol_table)
+                symbol_table.update_symbol(variable, value1)
             else:
                 operator_function = symbol_table.get_symbol(node.op.symbol)
-                return operator_function(a, b)
+                return operator_function(a1, b)
 
         case ast.TernaryOp():
             if interpret(node.cond, symbol_table):
@@ -37,9 +41,10 @@ def interpret(node: ast.Expression, symbol_table: SymTab) -> Value:
                 return interpret(node.else_, symbol_table)
 
         case ast.VariableDeclaration():
-            identifier: Any = node.identifier.name
+            identifier: str = node.identifier.name
             value: Any = interpret(node.initializer, symbol_table)
             symbol_table.add_symbol(identifier, value)
+
             return value
 
         case ast.FunctionCall():
@@ -58,6 +63,7 @@ def interpret(node: ast.Expression, symbol_table: SymTab) -> Value:
                 interpret(statement, block_symbol_table)
             return_value = interpret(node.result_expression, block_symbol_table)
             return return_value
+    return None
 
 
 if __name__ == "__main__":

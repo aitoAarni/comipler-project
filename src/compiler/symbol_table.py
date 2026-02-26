@@ -6,10 +6,10 @@ class SymTab:
         self.symbols = {}
         self.parent = parent
 
-    def add_symbol(self, identifier, value):
+    def add_symbol(self, identifier: str, value: any) -> None:
         self.symbols[identifier] = value
 
-    def update_symbol(self, identifier, value):
+    def update_symbol(self, identifier: str, value: any) -> None:
         if identifier in self.symbols:
             return self.add_symbol(identifier, value)
         elif self.parent:

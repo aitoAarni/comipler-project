@@ -35,9 +35,9 @@ def expression_ends_with_block(expression: ast.Expression) -> bool:
     return type(expression) == ast.Block
 
 
-def create_top_level_variable_symbol_table():
+def create_top_level_variable_symbol_table() -> SymTab:
     st = SymTab()
-    st.add_symbol("unary_-", Funtype())
+    st.add_symbol("unary_-", o.inv)
     st.add_symbol("unary_not", o.not_)
     st.add_symbol("+", o.add)
     st.add_symbol("-", o.sub)
