@@ -8,7 +8,8 @@ def get_keywords() -> list[str]:
     return ["if", "while", "var"]
 
 
-def search_last_expression(statement: ast.ConditionalStatement) -> bool:
+def search_last_expression(
+        statement: ast.ConditionalStatement) -> ast.Expression:
     statement_type = type(statement)
     if statement_type == ast.WhileStatement:
         return statement.body
@@ -19,20 +20,20 @@ def search_last_expression(statement: ast.ConditionalStatement) -> bool:
         return statement.else_
 
 
-def expression_ends_with_block(expression: ast.Expression) -> bool:
+def expression_ends_with_block(expression: ast.Expression | None) -> bool:
     while True:
-        expression_type = type(expression)
-        if issubclass(expression_type, ast.ConditionalStatement):
+        if issubclass(type(expression), ast.ConditionalStatement):
             expression = search_last_expression(expression)
-        elif expression_type in [ast.UnaryOp, ast.BinaryOp]:
+
+        elif isinstance(expression, (ast.UnaryOp, ast.BinaryOp)):
             expression = expression.right
 
-        elif expression_type == ast.VariableDeclaration:
+        elif isinstance(expression, ast.VariableDeclaration):
             expression = expression.initializer
-
+        elif isinstance(expression, ast.Block):
+            return True
         else:
-            break
-    return type(expression) == ast.Block
+            return False
 
 
 def create_top_level_variable_symbol_table() -> SymTab:
@@ -77,7 +78,7 @@ def create_top_level_type_symbol_table() -> SymTab:
     return st
 
 
-def convert_boolean_literal(literal: str):
+def convert_boolean_literal(literal: str) -> bool:
     if literal == "true":
         return True
     elif literal == "false":
