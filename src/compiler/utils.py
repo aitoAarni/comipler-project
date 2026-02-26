@@ -8,22 +8,24 @@ def get_keywords() -> list[str]:
     return ["if", "while", "var"]
 
 
-def search_last_expression(
-        statement: ast.ConditionalStatement) -> ast.Expression:
-    statement_type = type(statement)
-    if statement_type == ast.WhileStatement:
+def search_last_expression_of_conditional(
+        statement: ast.ConditionalStatement) -> ast.Expression | None:
+    if isinstance(statement, ast.WhileStatement):
         return statement.body
 
-    elif statement_type == ast.TernaryOp:
+    elif isinstance(statement, ast.TernaryOp):
         if statement.else_ is None:
             return statement.then_
         return statement.else_
+    else:
+        return None
 
 
 def expression_ends_with_block(expression: ast.Expression | None) -> bool:
     while True:
         if issubclass(type(expression), ast.ConditionalStatement):
-            expression = search_last_expression(expression)
+            assert isinstance(expression, ast.ConditionalStatement)
+            expression = search_last_expression_of_conditional(expression)
 
         elif isinstance(expression, (ast.UnaryOp, ast.BinaryOp)):
             expression = expression.right
