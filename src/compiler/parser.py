@@ -81,12 +81,13 @@ class Parser:
                 self.consume(",")
         self.consume(")")
         return ast.FunctionCall(
-            identifier.location.new(), identifier, args
-        )
+            None if identifier.location is None else identifier.location.new(),
+            identifier,
+            args)
 
-    def parse_top_level(self):
+    def parse_top_level(self) -> ast.Expression | ast.Block:
         statements = []
-        result_expression = ast.Literal(Loc(), None)
+        result_expression: ast.Expression = ast.Literal(Loc(), None)
         while self.peek().type != "end":
             expression = self.parse_expression(True)
             if self.peek().type == "end":
@@ -99,7 +100,7 @@ class Parser:
         if not statements:
             return result_expression
         return ast.Block(
-            result_expression.location.new(),
+            None if result_expression.location is None else result_expression.location.new(),
             statements,
             result_expression)
 
@@ -132,8 +133,10 @@ class Parser:
             else:
                 right_operand = self.parse_expression()
             left_operand = ast.BinaryOp(
-                operator.location.new(), left_operand, operator, right_operand
-            )
+                None if operator.location is None else operator.location.new(),
+                left_operand,
+                operator,
+                right_operand)
         return left_operand
 
     def parse_level_1(self) -> ast.Expression:
@@ -173,7 +176,10 @@ class Parser:
                 operator_token.location.new(),
                 operator_token.text)
             right = self.parse_level_8()
-            return ast.UnaryOp(operator.location.new(), operator, right)
+            return ast.UnaryOp(
+                None if operator.location is None else operator.location.new(),
+                operator,
+                right)
         else:
             return self.parse_level_9()
 
@@ -191,7 +197,8 @@ class Parser:
                 f'{self.peek().location}: expected "(", an integer literal or an identifier'
             )
 
-    def parse_keyword(self):
+    def parse_keyword(
+            self) -> ast.TernaryOp | ast.WhileStatement | ast.VariableDeclaration:
         if self.peek().text == "if":
             parse
             return self.parse_if_statement()
@@ -201,8 +208,8 @@ class Parser:
             return self.parse_var_declaration()
         else:
             raise Exception(
-                f"Keyowrd {
-                    self.peek().text} is not handled in parser")
+                f"Keyowrd "
+                f"{self.peek().text} is not handled in parser")
 
     def parse_if_statement(self) -> ast.TernaryOp:
         self.consume("if")
@@ -213,14 +220,19 @@ class Parser:
         if self.peek().text == "else":
             self.consume("else")
             else_ = self.parse_expression()
-        return ast.TernaryOp(if_.location.new(), if_, then_, else_)
+        return ast.TernaryOp(
+            None if if_.location is None else if_.location.new(),
+            if_,
+            then_,
+            else_)
 
     def parse_while_statement(self) -> ast.WhileStatement:
         self.consume("while")
         cond = self.parse_expression()
         self.consume("do")
         body = self.parse_expression()
-        return ast.WhileStatement(cond.location.new(), cond, body)
+        return ast.WhileStatement(
+            None if cond.location is None else cond.location.new(), cond, body)
 
     def parse_var_declaration(self) -> ast.VariableDeclaration:
         if not self.allow_var_declaration:
@@ -235,8 +247,9 @@ class Parser:
         self.consume("=")
         initializer = self.parse_expression()
         return ast.VariableDeclaration(
-            identifier.location.new(), identifier, initializer
-        )
+            None if identifier.location is None else identifier.location.new(),
+            identifier,
+            initializer)
 
     def parse_parenthesized(self) -> ast.Expression:
         self.consume("(")
@@ -250,9 +263,11 @@ class Parser:
         self.consume("}")
         return ast.Block(location, statements, result_expression)
 
-    def parse_inside_block(self):
+    def parse_inside_block(self) -> tuple[Loc | None,
+                                          list[ast.Expression],
+                                          ast.Expression]:
         statements: list[ast.Expression] = []
-        result_expression = ast.Literal(Loc(), None)
+        result_expression: ast.Expression = ast.Literal(Loc(), None)
         while self.peek().text != "}":
             statement = self.parse_expression(True)
             next_token = self.peek().text
@@ -267,22 +282,26 @@ class Parser:
                 next_token = self.peek().text
                 if next_token != "}":
                     statements.append(
-                        ast.Block(nested_block.location.new(), [], nested_block)
-                    )
+                        ast.Block(
+                            None if nested_block.location is None else nested_block.location.new(),
+                            [],
+                            nested_block))
                     if next_token == ";":
                         self.consume(";")
                 else:
                     result_expression = ast.Block(
-                        nested_block.location.new(), [], nested_block
-                    )
+                        None if nested_block.location is None else nested_block.location.new(),
+                        [],
+                        nested_block)
             else:
                 statements.append(statement)
                 if not expression_ends_with_block(
                         statement) or next_token == ";":
                     self.consume(";")
-        return result_expression.location.new(), statements, result_expression
+        return None if result_expression.location is None else result_expression.location.new(
+        ), statements, result_expression
 
-    def parse(self):
+    def parse(self) -> ast.Expression | None:
         if not bool(self.tokens):
             return None
         expression = self.parse_top_level()
@@ -296,13 +315,15 @@ class Parser:
         return expression
 
 
-def parse(tokens: list[Token]) -> ast.Expression:
+def parse(tokens: list[Token]) -> ast.Expression | None:
     parser = Parser(tokens)
     return parser.parse()
 
 
-def check_is_identifier(expression: ast.Expression, Error_msg=None) -> None:
-    if Error_msg is None:
+def check_is_identifier(
+        expression: ast.Expression,
+        Error_msg: str = "") -> None:
+    if not len(Error_msg):
         Error_msg = "Expected an Identifier"
     if not isinstance(expression, ast.Identifier):
         raise Exception(Error_msg)

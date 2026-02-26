@@ -13,7 +13,7 @@ def type_table() -> SymTab:
     return create_top_level_type_symbol_table()
 
 
-def create_ast(text: str) -> ast.Expression:
+def create_ast(text: str) -> ast.Expression | None:
     tokens = tokenizer(text)
     abstract_syntax_tree = parse(tokens)
     return abstract_syntax_tree

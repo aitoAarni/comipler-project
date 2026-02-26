@@ -1,3 +1,4 @@
+from typing import Self
 from dataclasses import dataclass, field
 
 
@@ -7,7 +8,7 @@ class Location:
     column: int | None = None
     _testing: bool = field(default=False, init=False, repr=False)
 
-    def new(self):
+    def new(self) -> Self:
         new_source_location = Location(self.line, self.column)
         new_source_location._testing = self._testing
         return new_source_location

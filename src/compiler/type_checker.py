@@ -6,7 +6,8 @@ from compiler.symbol_table import SymTab
 from compiler.utils import create_top_level_type_symbol_table
 
 
-def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
+def typecheck(node: ast.Expression | None,
+              type_table: SymTab) -> PrimitiveType | None:
     match node:
         case ast.Literal():
             val_type = type(node.value)
@@ -31,9 +32,9 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
             function = type_table.get_symbol("unary_" + node.op.symbol)
             if operand != function.arg_types[0]:
                 raise Exception(
-                    f"Error: argument to operator {node.op.symbol} must be of type"
-                    f" {function.arg_types[0]}, but was of type {operand}"
-                )
+                    f"Error: argument to operator "
+                    f"{node.op.symbol} must be of type"
+                    f" {function.arg_types[0]}, but was of type {operand}")
             return function.return_type
 
         case ast.BinaryOp():
@@ -43,10 +44,8 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
             if node.op.symbol in ["=", "==", "!="]:
                 if t1 != t2:
                     raise Exception(
-                        f"Error: arguments to operator {node.op.symbol} must be of type"
-                        f" {function.arg_types[0]} {node.op.symbol} {function.arg_types[1]}"
-                        f", but they were {t1} {node.op.symbol} {t2}"
-                    )
+                        f"Error: arguments to operator"
+                        " {node.op.symbol} must be of same type")
                 if node.op.symbol == "=":
                     return Unit
                 return Bool
@@ -55,10 +54,11 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
 
                 if t1 != function.arg_types[0] or t2 != function.arg_types[1]:
                     raise Exception(
-                        f"Error: arguments to operator {node.op.symbol} must be of type"
-                        f" {function.arg_types[0]} {node.op.symbol} {function.arg_types[1]}"
-                        f", but they were {t1} {node.op.symbol} {t2}"
-                    )
+                        f"Error: arguments to operator """
+                        "{node.op.symbol} must be of type"
+                        f" {function.arg_types[0]} {node.op.symbol}"
+                        f" {function.arg_types[1]}"
+                        f", but they were {t1} {node.op.symbol} {t2}")
                 return function.return_type
 
         case ast.TernaryOp():
@@ -67,7 +67,7 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
                 raise Exception(f"Error: condition {node.cond} is not {Bool}")
             t2 = typecheck(node.then_, type_table)
 
-            if not node.else_ is None:
+            if node.else_ is not None:
                 t3 = typecheck(node.else_, type_table)
 
             if node.else_ is None:
@@ -100,9 +100,10 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
                 if function.arg_types[i] == arg_type:
                     continue
                 raise Exception(
-                    f"Error: function {node.function_name.name} expected paremater type {function.arg_types[i]}"
-                    f", but got instead {arg_type}: {arg}."
-                )
+                    f"Error: function """
+                    f"{node.function_name.name} expected "
+                    f"paremater type {function.arg_types[i]}"
+                    f", but got instead {arg_type}: {arg}.")
             return function.return_type
 
         case ast.Block():
@@ -111,6 +112,9 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
             for statement in statements:
                 typecheck(statement, nested_type_table)
             return typecheck(node.result_expression, nested_type_table)
+        case None:
+            return None
+    return Unit
 
 
 if __name__ == "__main__":
