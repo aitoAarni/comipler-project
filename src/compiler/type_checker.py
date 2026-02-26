@@ -66,7 +66,9 @@ def typecheck(node: ast.Expression, type_table: SymTab) -> PrimitiveType:
             if t1 is not Bool:
                 raise Exception(f"Error: condition {node.cond} is not {Bool}")
             t2 = typecheck(node.then_, type_table)
-            t3 = typecheck(node.else_, type_table)
+
+            if not node.else_ is None:
+                t3 = typecheck(node.else_, type_table)
 
             if node.else_ is None:
                 return t2

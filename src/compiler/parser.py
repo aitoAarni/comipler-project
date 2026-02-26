@@ -35,13 +35,15 @@ class Parser:
             raise Exception(f'{token.location}: expected "{expected}"')
         if isinstance(expected, list) and token.text not in expected:
             comma_separated = ", ".join([f'"{e}"' for e in expected])
-            raise Exception(f"{token.location}: expected one of: {comma_separated}")
+            raise Exception(
+                f"{token.location}: expected one of: {comma_separated}")
         self.pos += 1
         return token
 
     def parse_int_literal(self) -> ast.Literal:
         if self.peek().type != "int_literal":
-            raise Exception(f"{self.peek().location}: expected an integer literal")
+            raise Exception(
+                f"{self.peek().location}: expected an integer literal")
         token = self.consume()
         return ast.Literal(
             token.location.new(),
@@ -65,7 +67,9 @@ class Parser:
             return self.parse_function_call(identifier)
         return identifier
 
-    def parse_function_call(self, identifier: ast.Identifier) -> ast.FunctionCall:
+    def parse_function_call(
+            self,
+            identifier: ast.Identifier) -> ast.FunctionCall:
         self.consume("(")
         args: list[ast.Expression] = []
         if self.peek().text != ")":
@@ -77,7 +81,7 @@ class Parser:
                 self.consume(",")
         self.consume(")")
         return ast.FunctionCall(
-            identifier.location.new(), identifier, args if args else None
+            identifier.location.new(), identifier, args
         )
 
     def parse_top_level(self):
@@ -89,13 +93,19 @@ class Parser:
                 result_expression = expression
                 break
             statements.append(expression)
-            if not expression_ends_with_block(expression) or self.peek().text == ";":
+            if not expression_ends_with_block(
+                    expression) or self.peek().text == ";":
                 self.consume(";")
         if not statements:
             return result_expression
-        return ast.Block(result_expression.location.new(), statements, result_expression)
+        return ast.Block(
+            result_expression.location.new(),
+            statements,
+            result_expression)
 
-    def parse_expression(self, allow_var_declaration: bool = False) -> ast.Expression:
+    def parse_expression(
+            self,
+            allow_var_declaration: bool = False) -> ast.Expression:
         initial_state = self.allow_var_declaration
         self.allow_var_declaration = allow_var_declaration
         expression = self.parse_level_1()
@@ -114,7 +124,9 @@ class Parser:
             if left_operand_check:
                 left_operand_check(left_operand)
             operator_token = self.consume(operators)
-            operator = ast.Operator(operator_token.location.new(), operator_token.text)
+            operator = ast.Operator(
+                operator_token.location.new(),
+                operator_token.text)
             if left_associative:
                 right_operand = next_func()
             else:
@@ -145,7 +157,8 @@ class Parser:
         return self.parse_binary_operator(["!=", "=="], self.parse_level_5)
 
     def parse_level_5(self) -> ast.Expression:
-        return self.parse_binary_operator(["<", "<=", ">", ">="], self.parse_level_6)
+        return self.parse_binary_operator(
+            ["<", "<=", ">", ">="], self.parse_level_6)
 
     def parse_level_6(self) -> ast.Expression:
         return self.parse_binary_operator(["+", "-"], self.parse_level_7)
@@ -156,7 +169,9 @@ class Parser:
     def parse_level_8(self) -> ast.Expression:
         if self.peek().text in ["not", "-"]:
             operator_token = self.consume(["not", "-"])
-            operator = ast.Operator(operator_token.location.new(), operator_token.text)
+            operator = ast.Operator(
+                operator_token.location.new(),
+                operator_token.text)
             right = self.parse_level_8()
             return ast.UnaryOp(operator.location.new(), operator, right)
         else:
@@ -185,7 +200,9 @@ class Parser:
         elif self.peek().text == "var":
             return self.parse_var_declaration()
         else:
-            raise Exception(f"Keyowrd {self.peek().text} is not handled in parser")
+            raise Exception(
+                f"Keyowrd {
+                    self.peek().text} is not handled in parser")
 
     def parse_if_statement(self) -> ast.TernaryOp:
         self.consume("if")
@@ -213,7 +230,7 @@ class Parser:
             )
         self.consume("var")
         identifier = self.parse_identifier()
-        if type(identifier) != ast.Identifier:
+        if not isinstance(identifier, ast.Identifier):
             raise Exception(f"Variable must be of type identifier")
         self.consume("=")
         initializer = self.parse_expression()
@@ -260,7 +277,8 @@ class Parser:
                     )
             else:
                 statements.append(statement)
-                if not expression_ends_with_block(statement) or next_token == ";":
+                if not expression_ends_with_block(
+                        statement) or next_token == ";":
                     self.consume(";")
         return result_expression.location.new(), statements, result_expression
 
@@ -271,8 +289,10 @@ class Parser:
         if self.pos != self.token_length:
             loc = self.peek().location
             raise Exception(
-                f"Invalid syntax at ({loc.line}, {loc.column}), token: {self.peek().text}"
-            )
+                f"Invalid syntax at ({
+                    loc.line}, {
+                    loc.column}), token: {
+                    self.peek().text}")
         return expression
 
 
@@ -282,9 +302,9 @@ def parse(tokens: list[Token]) -> ast.Expression:
 
 
 def check_is_identifier(expression: ast.Expression, Error_msg=None) -> None:
-    if Error_msg == None:
+    if Error_msg is None:
         Error_msg = "Expected an Identifier"
-    if type(expression) != ast.Identifier:
+    if not isinstance(expression, ast.Identifier):
         raise Exception(Error_msg)
 
 

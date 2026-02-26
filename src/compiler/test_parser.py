@@ -38,7 +38,7 @@ def Punctuation(args: str) -> ast.Punctuation:
 
 def FunctionCall(name: ast.Identifier,
                  args: list[ast.Expression] | None = None) -> ast.FunctionCall:
-    return ast.FunctionCall(loc_stub, name, args)
+    return ast.FunctionCall(loc_stub, name, [] if args is None else args)
 
 
 def UnaryOp(op: ast.Operator, t1: ast.Expression) -> ast.UnaryOp:
@@ -380,7 +380,7 @@ def test_assignment_only_to_identifier() -> None:
 
 def test_while_do_statment() -> None:
     correct_answer = WhileStatement(
-        Identifier("x"), FunctionCall(Identifier("print"), args=None)
+        Identifier("x"), FunctionCall(Identifier("print"))
     )
     tokens = create_tokens(
         ["while", t[1]],
