@@ -150,7 +150,10 @@ def test_function_variable_declarations_with_type(type_table: SymTab) -> None:
 
 def test_wrong_function_variable_declarations_with_type_throws(
         type_table: SymTab) -> None:
-    with pytest.raises(Exception, match=r"Error: you can only assign type FunType\(arg_types=\[Int\], "
-                            r"return_type=Int\) to x, but you tried to assign FunType\(arg_types=\[Int\], return_type=Unit\)"):
+    with pytest.raises(Exception, match=r"Error: you can only assign type "
+                       r"FunType\(arg_types=\[Int\], "
+                       r"return_type=Int\) to x, but you tried"
+                       r" to assign FunType\(arg_types=\[Int\], return_type=Unit\)"
+                       ):
         parsed = create_ast("var x : (Int) => Int = print_int;")
         typecheck(parsed, type_table)
