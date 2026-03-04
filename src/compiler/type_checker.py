@@ -1,8 +1,8 @@
-from compiler.types import Int, Bool, Unit, FunType, PrimitiveType
+from compiler.types import Int, Bool, Unit, PrimitiveType
 from compiler.tokenizer import tokenizer
 from compiler.parser import parse
 import compiler.custom_ast as ast
-from compiler.symbol_table import SymTab
+from compiler.symbol_table import SymTab, symbol_table_factory
 from compiler.utils import create_top_level_type_symbol_table
 
 
@@ -108,7 +108,7 @@ def typecheck(node: ast.Expression | None,
 
         case ast.Block():
             statements = node.statements
-            nested_type_table = SymTab(type_table)
+            nested_type_table = symbol_table_factory("types", type_table)
             for statement in statements:
                 typecheck(statement, nested_type_table)
             return typecheck(node.result_expression, nested_type_table)

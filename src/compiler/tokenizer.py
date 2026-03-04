@@ -34,7 +34,7 @@ def tokenize_line(source_code: str, line_number: int) -> list[Token]:
         punctuation_re,
     ]
     previous_match_end = 0
-    tokens: list[str] = []
+    tokens: list[Token] = []
     reqiure_non_identifier_char_after = False
     while previous_match_end < len(source_code):
         for regex in regular_expressions:
@@ -100,7 +100,7 @@ def get_regex_for_token(regex: str) -> str:
     return tokenizer_regexes[regex]
 
 
-def tokenizer(source_code: str = ""):
+def tokenizer(source_code: str = "") -> list[Token]:
     tokens = []
     lines = source_code.split("\n")
     for i, line in enumerate(lines):
