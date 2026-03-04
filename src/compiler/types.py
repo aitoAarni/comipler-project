@@ -3,12 +3,12 @@ from dataclasses import dataclass
 
 @dataclass
 class PrimitiveType:
-    type: str
+    type: str | None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.type)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self.type)
 
 Int = PrimitiveType("Int")

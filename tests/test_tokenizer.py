@@ -1,5 +1,5 @@
 import pytest
-from .tokenizer import tokenizer, Token, Location
+from compiler.tokenizer import tokenizer, Token, Location
 
 
 def create_tokens(token_type: str, *values: str | int) -> list[Token]:
