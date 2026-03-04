@@ -5,7 +5,7 @@ from compiler.parser import parse
 import compiler.custom_ast as ast
 from compiler.utils import get_keywords
 from compiler.tokenizer import tokenizer
-from compiler.types import Int, Bool, FunType, PrimitiveType
+from compiler.types import Int, Bool, Unit, FunType, PrimitiveType
 
 t = ["int_literal", "identifier", "punctuation", "operator"]
 loc_stub = Location(None, None)
@@ -621,3 +621,9 @@ def test_too_many_variable_types_in_declaration_throws() -> None:
     tokens = tokenizer("var x : Bool Bool  = true")
     with pytest.raises(Exception, match=r'\(1, 14\): expected "="'):
         parse(tokens)
+
+def test_variable_function_type_declaration() -> None:
+    correct_answer = VariableDeclaration(Identifier("x"), Identifier("print_bool"), FunType([Bool], Unit))
+    tokens = tokenizer("var x : (Bool) => Unit  = print_bool")
+    parsed = parse(tokens)
+    assert parsed == correct_answer
