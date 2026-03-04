@@ -240,8 +240,20 @@ class Parser:
         self.consume(":")
         if self.peek().text != "(":
             return convert_token_to_type(self.consume())
-        print("wrong")
-        return convert_token_to_type(self.consume())
+
+        # Must be a function declaration
+        self.consume("(")
+        function_args: list[PrimitiveType] = []
+        while self.peek().text != ")":
+            arg_token = self.consume()
+            arg_type = convert_token_to_type(arg_token)
+            function_args.append(arg_type)
+        self.consume(")") 
+        self.consume("=")
+        self.consume(">")
+        function_return_token = self.consume()
+        function_return_type = convert_token_to_type(function_return_token)
+        return FunType(function_args, function_return_type)
 
 
     def parse_var_declaration(self) -> ast.VariableDeclaration:
@@ -345,6 +357,6 @@ def check_is_identifier(
 
 
 if __name__ == "__main__":
-    tokens = tokenizer("var a: Int = 2")
+    tokens = tokenizer("var a: (Int) => Unit = print_int")
     parsed = parse(tokens)
     print(parsed)
