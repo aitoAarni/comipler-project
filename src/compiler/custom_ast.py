@@ -1,12 +1,14 @@
 from dataclasses import dataclass, field
 from compiler.location import Location
-from compiler.types import FunType, PrimitiveType
+from compiler.types import FunType, PrimitiveType, Unit, Type
+
 
 
 @dataclass
 class Expression:
     """Base class for AST nodes representing expressions."""
     location: Location | None
+    type: Type = field(kw_only=True, default=Unit)
 
 
 @dataclass

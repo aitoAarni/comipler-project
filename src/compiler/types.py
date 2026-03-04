@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+type Type = PrimitiveType | FunType
 
 @dataclass
 class PrimitiveType:
