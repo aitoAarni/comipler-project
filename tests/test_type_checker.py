@@ -82,7 +82,7 @@ def test_function_call_throws_w_too_many_args(type_table: SymTab) -> None:
 def test_function_call_throws_w_wrong_args(type_table: SymTab) -> None:
     with pytest.raises(
         Exception,
-        match=r"Error: function print_int expected paremater type Int, but got instead Bool: Literal\(location=\(1, 11\), value=True\).",
+        match=r"Error: function print_int expected paremater type Int, but got instead Bool: Literal\(location=\(1, 11\), type=None, value=True\).",
     ):
         typecheck(create_ast("print_int(true)"), type_table)
 

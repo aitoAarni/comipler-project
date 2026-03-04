@@ -8,7 +8,7 @@ from compiler.types import FunType, PrimitiveType, Unit, Type
 class Expression:
     """Base class for AST nodes representing expressions."""
     location: Location | None
-    type: Type = field(kw_only=True, default=Unit)
+    type: Type = field(kw_only=True, default_factory=lambda: Unit)
 
 
 @dataclass
