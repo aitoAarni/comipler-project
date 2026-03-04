@@ -615,3 +615,8 @@ def test_variable_type_declaration() -> None:
     tokens = tokenizer("var x : Int  = 4")
     parsed = parse(tokens)
     assert parsed == correct_answer
+
+def test_too_many_variable_types_in_declaration_throws() -> None:
+    tokens = tokenizer("var x : Bool Bool  = true")
+    with pytest.raises(Exception, match=r'\(1, 14\): expected "="'):
+        parse(tokens)
