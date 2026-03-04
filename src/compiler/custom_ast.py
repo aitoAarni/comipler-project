@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from compiler.location import Location
+from compiler.types import FunType, PrimitiveType
 
 
 @dataclass
@@ -7,13 +8,16 @@ class Expression:
     """Base class for AST nodes representing expressions."""
     location: Location | None
 
+
 @dataclass
 class Literal(Expression):
     value: int | bool | None
 
+
 @dataclass
 class Identifier(Expression):
     name: str
+
 
 @dataclass
 class Operator(Expression):
@@ -67,11 +71,13 @@ class WhileStatement(ConditionalStatement):
 @dataclass
 class Block(Expression):
     statements: list[Expression]
-    result_expression: Expression = field(default_factory=lambda: Literal(Location(), None))
+    result_expression: Expression = field(
+        default_factory=lambda: Literal(
+            Location(), None))
 
 
 @dataclass
 class VariableDeclaration(Expression):
     identifier: Identifier
     initializer: Expression
-    var_type: str | None = None
+    var_type: PrimitiveType | FunType | None = None

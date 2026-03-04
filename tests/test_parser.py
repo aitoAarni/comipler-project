@@ -5,6 +5,7 @@ from compiler.parser import parse
 import compiler.custom_ast as ast
 from compiler.utils import get_keywords
 from compiler.tokenizer import tokenizer
+from compiler.types import Int, Bool, FunType, PrimitiveType
 
 t = ["int_literal", "identifier", "punctuation", "operator"]
 loc_stub = Location(None, None)
@@ -70,7 +71,7 @@ def Block(args: list[ast.Expression] | None = None,
 
 
 def VariableDeclaration(identifier: ast.Identifier, 
-                        initializer: ast.Expression, var_type: str | None = None) -> ast.VariableDeclaration:
+                        initializer: ast.Expression, var_type: PrimitiveType | FunType | None = None) -> ast.VariableDeclaration:
     return ast.VariableDeclaration(loc_stub, identifier, initializer, var_type)
 
 
@@ -611,7 +612,7 @@ def test_multiple_top_level_expressions() -> None:
     assert parsed == correct_answer
 
 def test_variable_type_declaration() -> None:
-    correct_answer = VariableDeclaration(Identifier("x"), Literal(4), "Int")
+    correct_answer = VariableDeclaration(Identifier("x"), Literal(4), Int)
     tokens = tokenizer("var x : Int  = 4")
     parsed = parse(tokens)
     assert parsed == correct_answer

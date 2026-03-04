@@ -7,7 +7,9 @@ from compiler.utils import (
     get_keywords,
     expression_ends_with_block,
     convert_boolean_literal,
+    convert_token_to_type
 )
+from compiler.types import PrimitiveType, FunType
 
 
 class Parser:
@@ -245,11 +247,11 @@ class Parser:
         if not isinstance(identifier, ast.Identifier):
             raise Exception(f"Variable must be of type identifier")
 
-        var_type: str | None = None
+        var_type: FunType | PrimitiveType | None = None
         if self.peek().text == ":":
-            print("broooov")
             self.consume(":")
-            var_type = self.consume().text
+            type_token = self.consume()
+            var_type = convert_token_to_type(type_token)
             
         self.consume("=")
         initializer = self.parse_expression()

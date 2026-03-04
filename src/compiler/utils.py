@@ -1,8 +1,9 @@
 import compiler.custom_ast as ast
 from compiler.symbol_table import symbol_table_factory, SymTab
 import operator as o
-from compiler.types import FunType, Int, Bool, Unit
+from compiler.types import FunType, Int, Bool, Unit, PrimitiveType
 from typing import Callable, Any
+from compiler.tokenizer import Token
 
 
 def get_keywords() -> list[str]:
@@ -87,6 +88,20 @@ def convert_boolean_literal(literal: str) -> bool:
     elif literal == "false":
         return False
     raise Exception(f"Error: expected type boolean literal but got {literal}")
+
+# def 
+
+def convert_token_to_type(identifier: Token) -> PrimitiveType:
+    match identifier.text:
+        case "Int":
+            return Int
+        case "Bool":
+            return Bool
+        case "Unit":
+            return Unit
+        case _:
+            raise ValueError("Error: type must be Int, Book or Unit.")
+    
 
 
 if __name__ == "__main__":
