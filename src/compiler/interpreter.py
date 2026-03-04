@@ -3,7 +3,7 @@ from typing import Any
 import compiler.custom_ast as ast
 from compiler.tokenizer import tokenizer
 from compiler.parser import parse
-from compiler.symbol_table import SymTab
+from compiler.symbol_table import SymTab, symbol_table_factory
 from compiler.utils import create_top_level_variable_symbol_table
 
 type Value = int | bool | None
@@ -58,7 +58,7 @@ def interpret(node: ast.Expression | None, symbol_table: SymTab) -> Value:
 
         case ast.Block():
             statements = node.statements
-            block_symbol_table = SymTab(symbol_table)
+            block_symbol_table = symbol_table_factory("variables", symbol_table)
             for statement in statements:
                 interpret(statement, block_symbol_table)
             return_value = interpret(node.result_expression, block_symbol_table)

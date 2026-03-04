@@ -34,20 +34,30 @@ class SymTab[T: SymTabReturnType]:
             [f"{pair[0]}: {pair[1]}" for pair in self.symbols.items()]
         )
 
+
 type SymTabFactoryArgs = Literal["types", "variables"]
 
-@overload
-def symbol_table_factory(symbol_table_type: Literal["types"]) -> SymTab[FunType]:...
 
 @overload
-def symbol_table_factory(symbol_table_type: Literal["variables"]) -> SymTab[Callable[..., Any]]:...
+def symbol_table_factory(
+    symbol_table_type: Literal["types"],
+    parent_symbol_table: None | SymTab = None) -> SymTab[FunType]: ...
 
 
-def symbol_table_factory(symbol_table_type: SymTabFactoryArgs) -> SymTab[Callable[..., Any]] | SymTab[FunType]:
+@overload
+def symbol_table_factory(
+    symbol_table_type: Literal["variables"],
+    parent_symbol_table: None | SymTab = None) -> SymTab[Callable[..., Any]]: ...
+
+
+def symbol_table_factory(symbol_table_type: SymTabFactoryArgs,
+                         parent_symbol_table: None | SymTab = None) -> SymTab[Callable[...,
+                                                                                       Any]] | SymTab[FunType]:
     match symbol_table_type:
         case "types":
-            return SymTab[FunType]()
+            return SymTab[FunType](parent_symbol_table)
         case "variables":
-            return SymTab[Callable[..., Any]]()
+            return SymTab[Callable[..., Any]](parent_symbol_table)
         case _:
-            raise ValueError("Error: SymTabFactory doesn't have that type defined")
+            raise ValueError(
+                "Error: SymTabFactory doesn't have that type defined")
