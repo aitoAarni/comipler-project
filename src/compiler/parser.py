@@ -236,6 +236,14 @@ class Parser:
         return ast.WhileStatement(
             None if cond.location is None else cond.location.new(), cond, body)
 
+    def _parse_variable_type(self) -> FunType | PrimitiveType:
+        self.consume(":")
+        if self.peek().text != "(":
+            return convert_token_to_type(self.consume())
+        print("wrong")
+        return convert_token_to_type(self.consume())
+
+
     def parse_var_declaration(self) -> ast.VariableDeclaration:
         if not self.allow_var_declaration:
             raise Exception(
@@ -249,9 +257,7 @@ class Parser:
 
         var_type: FunType | PrimitiveType | None = None
         if self.peek().text == ":":
-            self.consume(":")
-            type_token = self.consume()
-            var_type = convert_token_to_type(type_token)
+            var_type = self._parse_variable_type()
             
         self.consume("=")
         initializer = self.parse_expression()

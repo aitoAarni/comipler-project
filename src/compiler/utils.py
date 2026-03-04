@@ -89,7 +89,6 @@ def convert_boolean_literal(literal: str) -> bool:
         return False
     raise Exception(f"Error: expected type boolean literal but got {literal}")
 
-# def 
 
 def convert_token_to_type(identifier: Token) -> PrimitiveType:
     match identifier.text:
