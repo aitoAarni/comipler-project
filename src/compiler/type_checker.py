@@ -26,7 +26,6 @@ def typecheck(node: ast.Expression | None,
             variable = node.identifier.name
             value = typecheck(node.initializer, type_table)
             if node.var_type is not None:
-                print(f"node.var_type: {node.var_type} == value: {value}")
                 if not value == node.var_type:
                     raise Exception(
                         f"Error: you can only assign type "

@@ -82,7 +82,7 @@ def test_function_call_throws_w_too_many_args(type_table: SymTab) -> None:
 def test_function_call_throws_w_wrong_args(type_table: SymTab) -> None:
     with pytest.raises(
         Exception,
-        match=r"Error: function print_int expected paremater type Int, but got instead Bool: Literal\(location=\(1, 11\), type=None, value=True\).",
+        match=r"Error: function print_int expected paremater type Int, but got instead Bool: Literal\(location=\(1, 11\), type=Unit, value=True\).",
     ):
         typecheck(create_ast("print_int(true)"), type_table)
 
@@ -121,7 +121,7 @@ def test_ternary_opeartor_thorws_with_different_return_types(
     parsed = create_ast("var x = 1; if 2 != 4 then false else x = 3")
     with pytest.raises(
         Exception,
-        match=r"Error: If statement's else and then branch return values don't match Bool != None",
+        match=r"Error: If statement's else and then branch return values don't match Bool != Unit",
     ):
         typecheck(parsed, type_table)
 
@@ -129,3 +129,28 @@ def test_ternary_opeartor_thorws_with_different_return_types(
 def test_while_statement_type(type_table: SymTab) -> None:
     parsed = create_ast("while true do {12 % 6}")
     assert typecheck(parsed, type_table) == Int
+
+
+def test_variable_declarations_with_type(type_table: SymTab) -> None:
+    parsed = create_ast("var x : Int = 3; x")
+    assert typecheck(parsed, type_table) == Int
+
+
+def test_wrong_variable_declarations_with_type_throws(
+        type_table: SymTab) -> None:
+    with pytest.raises(Exception, match="Error: you can only assign type Unit to x, but you tried to assign Int"):
+        parsed = create_ast("var x : Unit = 3")
+        typecheck(parsed, type_table)
+
+
+def test_function_variable_declarations_with_type(type_table: SymTab) -> None:
+    parsed = create_ast("var x : (Int) => Unit = print_int")
+    assert typecheck(parsed, type_table) == Unit
+
+
+def test_wrong_function_variable_declarations_with_type_throws(
+        type_table: SymTab) -> None:
+    with pytest.raises(Exception, match=r"Error: you can only assign type FunType\(arg_types=\[Int\], "
+                            r"return_type=Int\) to x, but you tried to assign FunType\(arg_types=\[Int\], return_type=Unit\)"):
+        parsed = create_ast("var x : (Int) => Int = print_int;")
+        typecheck(parsed, type_table)
