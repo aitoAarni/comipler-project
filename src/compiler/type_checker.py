@@ -7,15 +7,18 @@ from compiler.utils import create_top_level_type_symbol_table
 
 
 def typecheck(node: ast.Expression | None,
-              type_table: SymTab) -> PrimitiveType | FunType | None:
+              type_table: SymTab) -> PrimitiveType | FunType:
     match node:
         case ast.Literal():
             val_type = type(node.value)
             if val_type == int:
+                node.type = Int
                 return Int
             elif val_type == bool:
+                node.type = Bool
                 return Bool
             else:
+                node.type = Bool
                 return Unit
 
         case ast.Identifier():
@@ -25,17 +28,19 @@ def typecheck(node: ast.Expression | None,
         case ast.VariableDeclaration():
             variable = node.identifier.name
             value = typecheck(node.initializer, type_table)
+            node.type = value
             if node.var_type is not None:
                 if not value == node.var_type:
                     raise Exception(
-                        f"Error: you can only assign type "
-                        f"{node.var_type} to "
-                        f"{node.identifier.name}, but you tried to assign {value}")
+                        f"Error: you can only assign type " f"{
+                            node.var_type} to " f"{
+                            node.identifier.name}, but you tried to assign {value}")
 
             type_table.add_symbol(variable, value)
             return Unit
         case ast.UnaryOp():
             operand = typecheck(node.right, type_table)
+            node.type = operand
             function = type_table.get_symbol("unary_" + node.op.symbol)
             if operand != function.arg_types[0]:
                 raise Exception(
@@ -46,6 +51,8 @@ def typecheck(node: ast.Expression | None,
 
         case ast.BinaryOp():
             t1 = typecheck(node.left, type_table)
+            node.type = t1
+
             t2 = typecheck(node.right, type_table)
 
             if node.op.symbol in ["=", "==", "!="]:
@@ -73,6 +80,7 @@ def typecheck(node: ast.Expression | None,
             if t1 is not Bool:
                 raise Exception(f"Error: condition {node.cond} is not {Bool}")
             t2 = typecheck(node.then_, type_table)
+            node.type = t2
 
             if node.else_ is not None:
                 t3 = typecheck(node.else_, type_table)
@@ -92,11 +100,13 @@ def typecheck(node: ast.Expression | None,
             if t1 is not Bool:
                 raise Exception(f"Error: condition {node.cond} is not {Bool}")
             t2 = typecheck(node.body, type_table)
+            node.type = t2
             return t2
 
         case ast.FunctionCall():
             args = node.args
             function = type_table.get_symbol(node.function_name.name)
+            node.type = function.return_type
             if len(args) > len(function.arg_types):
                 raise Exception(
                     f"Error: function {node.function_name.name} takes "
@@ -118,10 +128,12 @@ def typecheck(node: ast.Expression | None,
             nested_type_table = symbol_table_factory("types", type_table)
             for statement in statements:
                 typecheck(statement, nested_type_table)
-            return typecheck(node.result_expression, nested_type_table)
-        case None:
-            return None
-    return Unit
+            return_type = typecheck(node.result_expression, nested_type_table)
+            node.type = return_type
+            return return_type
+        case _:
+            raise ValueError(
+                f"Error: type of {node} isn't defined in typechecker")
 
 
 if __name__ == "__main__":
