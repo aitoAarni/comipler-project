@@ -99,7 +99,7 @@ def convert_token_to_type(identifier: Token) -> PrimitiveType:
         case "Unit":
             return Unit
         case _:
-            raise ValueError("Error: type must be Int, Book or Unit.")
+            raise ValueError("Error: type must be Int, Bool or Unit.")
     
 
 

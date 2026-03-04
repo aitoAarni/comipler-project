@@ -1,4 +1,4 @@
-from compiler.types import Int, Bool, Unit, PrimitiveType
+from compiler.types import Int, Bool, Unit, PrimitiveType, FunType
 from compiler.tokenizer import tokenizer
 from compiler.parser import parse
 import compiler.custom_ast as ast
@@ -7,7 +7,7 @@ from compiler.utils import create_top_level_type_symbol_table
 
 
 def typecheck(node: ast.Expression | None,
-              type_table: SymTab) -> PrimitiveType | None:
+              type_table: SymTab) -> PrimitiveType | FunType | None:
     match node:
         case ast.Literal():
             val_type = type(node.value)
@@ -25,6 +25,14 @@ def typecheck(node: ast.Expression | None,
         case ast.VariableDeclaration():
             variable = node.identifier.name
             value = typecheck(node.initializer, type_table)
+            if node.var_type is not None:
+                print(f"node.var_type: {node.var_type} == value: {value}")
+                if not value == node.var_type:
+                    raise Exception(
+                        f"Error: you can only assign type "
+                        f"{node.var_type} to "
+                        f"{node.identifier.name}, but you tried to assign {value}")
+
             type_table.add_symbol(variable, value)
             return Unit
         case ast.UnaryOp():
@@ -118,7 +126,7 @@ def typecheck(node: ast.Expression | None,
 
 
 if __name__ == "__main__":
-    code = "var x = 2"
+    code = "var x: (Bool) => Unit = print_bool"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
