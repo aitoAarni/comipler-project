@@ -74,3 +74,4 @@ class Block(Expression):
 class VariableDeclaration(Expression):
     identifier: Identifier
     initializer: Expression
+    var_type: str | None = None

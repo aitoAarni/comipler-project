@@ -118,7 +118,7 @@ def typecheck(node: ast.Expression | None,
 
 
 if __name__ == "__main__":
-    code = "not 20"
+    code = "var x = 2"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()

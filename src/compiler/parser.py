@@ -330,6 +330,6 @@ def check_is_identifier(
 
 
 if __name__ == "__main__":
-    tokens = tokenizer("var a = {a}; {c} {a};")
+    tokens = tokenizer("var a: Int = 2")
     parsed = parse(tokens)
     print(parsed)

@@ -69,9 +69,9 @@ def Block(args: list[ast.Expression] | None = None,
     return ast.Block(loc_stub, args, result_expr)
 
 
-def VariableDeclaration(identifier: ast.Identifier, *
-                        args: ast.Expression) -> ast.VariableDeclaration:
-    return ast.VariableDeclaration(loc_stub, identifier, *args)
+def VariableDeclaration(identifier: ast.Identifier, 
+                        initializer: ast.Expression, var_type: str | None = None) -> ast.VariableDeclaration:
+    return ast.VariableDeclaration(loc_stub, identifier, initializer, var_type)
 
 
 def test_parse_plus_operation() -> None:
