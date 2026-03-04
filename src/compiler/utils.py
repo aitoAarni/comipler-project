@@ -1,7 +1,8 @@
 import compiler.custom_ast as ast
-from compiler.symbol_table import SymTab
+from compiler.symbol_table import symbol_table_factory, SymTab
 import operator as o
 from compiler.types import FunType, Int, Bool, Unit
+from typing import Callable, Any
 
 
 def get_keywords() -> list[str]:
@@ -38,8 +39,8 @@ def expression_ends_with_block(expression: ast.Expression | None) -> bool:
             return False
 
 
-def create_top_level_variable_symbol_table() -> SymTab:
-    st = SymTab()
+def create_top_level_variable_symbol_table() -> SymTab[Callable[..., Any]]:
+    st = symbol_table_factory("variables")
     st.add_symbol("unary_-", o.inv)
     st.add_symbol("unary_not", o.not_)
     st.add_symbol("+", o.add)
@@ -60,8 +61,8 @@ def create_top_level_variable_symbol_table() -> SymTab:
     return st
 
 
-def create_top_level_type_symbol_table() -> SymTab:
-    st = SymTab()
+def create_top_level_type_symbol_table() -> SymTab[FunType]:
+    st = symbol_table_factory("types")
     st.add_symbol("unary_-", FunType([Int], Int))
     st.add_symbol("unary_not", FunType([Bool], Bool))
     st.add_symbol("+", FunType([Int, Int], Int))
