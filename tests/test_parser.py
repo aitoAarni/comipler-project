@@ -609,3 +609,9 @@ def test_multiple_top_level_expressions() -> None:
     tokens = tokenizer("a; {b;}; c")
     parsed = parse(tokens)
     assert parsed == correct_answer
+
+def test_variable_type_declaration() -> None:
+    correct_answer = VariableDeclaration(Identifier("x"), Literal(4), "Int")
+    tokens = tokenizer("var x : Int  = 4")
+    parsed = parse(tokens)
+    assert parsed == correct_answer

@@ -244,12 +244,19 @@ class Parser:
         identifier = self.parse_identifier()
         if not isinstance(identifier, ast.Identifier):
             raise Exception(f"Variable must be of type identifier")
+
+        var_type: str | None = None
+        if self.peek().text == ":":
+            print("broooov")
+            self.consume(":")
+            var_type = self.consume().text
+            
         self.consume("=")
         initializer = self.parse_expression()
         return ast.VariableDeclaration(
             None if identifier.location is None else identifier.location.new(),
             identifier,
-            initializer)
+            initializer, var_type)
 
     def parse_parenthesized(self) -> ast.Expression:
         self.consume("(")
