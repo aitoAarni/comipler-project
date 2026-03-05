@@ -137,9 +137,9 @@ def typecheck(node: ast.Expression | None,
 
 
 if __name__ == "__main__":
-    code = "var x: (Bool) => Unit = print_bool"
+    code = "1+1"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
     typed = typecheck(parsed, type_table)
-    print(typed)
+    print(parsed)
