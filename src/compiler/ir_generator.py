@@ -94,6 +94,7 @@ def generate_ir(
                 ins.append(ir.Call(
                     loc, var_op, [var_right], var_result))
                 return var_result
+
             case ast.BinaryOp():
                 # Ask the symbol table to return the variable that refers
                 # to the operator to call.
@@ -171,6 +172,16 @@ def generate_ir(
 
                 return var_unit
 
+            case ast.FunctionCall():
+                func_args: list[IRVar] = []
+                for arg in expr.args:
+                    func_args.append(visit(st, arg))
+                return_val = next(new_var)
+                
+                ins.append(ir.Call(loc, st.get_symbol(expr.function_name.name), func_args, return_val))
+
+                return return_val
+
             case _:
                 raise ValueError("Not implemented")
              # Other AST node cases (see below)
@@ -218,7 +229,7 @@ if __name__ == "__main__":
     from compiler.parser import parse
     from compiler.type_checker import typecheck
 
-    code = "while true do 1"
+    code = "print_int(3+4, 3)"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
