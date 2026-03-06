@@ -81,7 +81,7 @@ def typecheck(node: ast.Expression | None,
             if t1 is not Bool:
                 raise Exception(f"Error: condition {node.cond} is not {Bool}")
             t2 = typecheck(node.then_, type_table)
-            node.type = t2
+            node.type = Unit
 
             if node.else_ is not None:
                 t3 = typecheck(node.else_, type_table)

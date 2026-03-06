@@ -4,6 +4,7 @@ from compiler.types import Bool, Int, Unit
 from compiler.ir import IRVar, Label
 from compiler.utils import create_top_level_type_symbol_table
 from typing import Generator
+# TODO test multiple var declarations in same scope throws
 
 
 def generate_ir(
@@ -27,8 +28,8 @@ def generate_ir(
 
     new_var = new_var_generator()
 
-    def new_label() -> Label:
-        pass
+    label_generator = ir.LabelGenerator()
+        
 
     # We collect the IR instructions that we generate
     # into this list.
@@ -112,14 +113,17 @@ def generate_ir(
                         loc, var_op, [var_left, var_right], var_result))
                 return var_result
             case ast.TernaryOp():
+                l_then = label_generator.get_then_label(loc)
+                l_end = label_generator.get_if_end_label(loc)
+                l_else: Label | None  = None
+                if expr.else_ is not None:
+                    l_else = label_generator.get_else_label(loc)
+                var_cond = visit(st, expr.cond)
                 if expr.else_ is None:
                     # Create (but don't emit) some jump targets.
-                    l_then = new_label()
-                    l_end = new_label()
 
                     # Recursively emit instructions for
                     # evaluating the condition.
-                    var_cond = visit(st, expr.cond)
                     # Emit a conditional jump instruction
                     # to jump to 'l_then' or 'l_end',
                     # depending on the content of 'var_cond'.
@@ -133,11 +137,19 @@ def generate_ir(
 
                     # Emit the label that we jump to
                     # when we don't want to go to the "then" branch.
-                    ins.append(l_end)
+                else:
+                    ins.append(ir.CondJump(loc, var_cond, l_then, l_else))
+                    ins.append(l_then)
+                    visit(st, expr.then_)
+                    ins.append(l_else)
+                    visit(st, expr.else_)
 
-                    # An if-then expression doesn't return anything, so we
-                    # return a special variable "unit".
-                    return var_unit
+                ins.append(l_end)
+
+                # An if-then expression doesn't return anything, so we
+                # return a special variable "unit".
+                return var_unit
+                    
             case _:
                 raise ValueError("Not implemented")
              # Other AST node cases (see below)
@@ -157,7 +169,6 @@ def generate_ir(
 
     # Add IR code to print the result, based on the type assigned earlier
     # by the type checker.
-    print(f"Root expr: {root_expr}")
     if root_expr.type == Int:
         r_val = next(new_var)
         ins.append(
@@ -186,7 +197,7 @@ if __name__ == "__main__":
     from compiler.parser import parse
     from compiler.type_checker import typecheck
 
-    code = "var x = 1; var x = 3"
+    code = "if true then 1+2 else 1"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()

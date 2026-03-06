@@ -1,5 +1,5 @@
 from dataclasses import dataclass, fields
-from typing import Any
+from typing import Any, Generator, Callable
 from compiler.location import Location
 
 
@@ -10,6 +10,7 @@ class IRVar:
 
     def __str__(self) -> str:
         return self.name
+
 
 @dataclass(frozen=True)
 class Instruction():
@@ -31,16 +32,19 @@ class Instruction():
         )
         return f'{type(self).__name__}({args})'
 
+
 @dataclass(frozen=True)
 class LoadBoolConst(Instruction):
     """Loads a boolean constant value to `dest`."""
     value: bool
     dest: IRVar
 
+
 @dataclass(frozen=True)
 class Label(Instruction):
     """Marks the destination of a jump instruction."""
     name: str
+
 
 @dataclass(frozen=True)
 class LoadIntConst(Instruction):
@@ -48,11 +52,13 @@ class LoadIntConst(Instruction):
     value: int
     dest: IRVar
 
+
 @dataclass(frozen=True)
 class Copy(Instruction):
     """Copies a value from one variable to another."""
     source: IRVar
     dest: IRVar
+
 
 @dataclass(frozen=True)
 class Call(Instruction):
@@ -61,10 +67,12 @@ class Call(Instruction):
     args: list[IRVar]
     dest: IRVar
 
+
 @dataclass(frozen=True)
 class Jump(Instruction):
     """Unconditionally continues execution from the given label."""
     label: Label
+
 
 @dataclass(frozen=True)
 class CondJump(Instruction):
@@ -72,3 +80,34 @@ class CondJump(Instruction):
     cond: IRVar
     then_label: Label
     else_label: Label
+
+
+class LabelGenerator:
+    def __init__(self):
+        self.__then_count = self.__new_label_generator("then")
+        self.__else_count = self.__new_label_generator("else")
+        self.__if_end_count = self.__new_label_generator("if_end")
+
+
+    @staticmethod
+    def __new_label_generator(text: str) -> Generator[str, None, None]:
+        # Create a new unique IR variable
+        num = 1
+        while True:
+            var_name = text + str(num) if num != 1 else text
+            yield var_name
+            num += 1
+
+    def __create_label(self, loc: Location, generator: Callable[[str], Generator[str, None, None]]) -> Label:
+        name = next(generator)
+        return Label(loc, name)
+
+    def get_then_label(self, loc: Location):
+        return self.__create_label(loc, self.__then_count)
+
+    def get_if_end_label(self, loc: Location):
+        return self.__create_label(loc, self.__if_end_count)
+
+    def get_else_label(self, loc: Location):
+        return self.__create_label(loc, self.__else_count)
+
