@@ -4,7 +4,8 @@ from compiler.types import Bool, Int, Unit
 from compiler.ir import IRVar, Label
 from compiler.utils import create_top_level_type_symbol_table
 from typing import Generator
-# TODO test multiple var declarations in same scope throws
+
+# TODO add 'and' and 'or' keyowrds to work properly
 
 
 def generate_ir(
@@ -105,6 +106,30 @@ def generate_ir(
                     var_left = st.get_symbol(expr.left.name)
                     ins.append(ir.Copy(loc, var_right, var_left))
                     return var_left
+
+                elif expr.op.symbol == "or":
+                    result_var = visit(st, expr.left)
+                    l_or_skip = label_generator.get_or_skip_label(loc)
+                    l_or_right = label_generator.get_or_right_label(loc)
+                    l_or_end = label_generator.get_or_end_label(loc)
+                    ins.append(
+                        ir.CondJump(
+                            loc,
+                            result_var,
+                            l_or_skip,
+                            l_or_right))
+                    ins.append(l_or_right)
+                    var_right = visit(st, expr.right)
+                    result_var = next(new_var)
+                    ins.append(ir.Copy(loc, var_right, result_var))
+                    ins.append(ir.Jump(loc, l_or_end))
+
+                    ins.append(l_or_skip)
+                    ins.append(ir.Jump(loc, l_or_end))
+
+                    ins.append(l_or_end)
+                    return result_var
+
                 else:
                     # Recursively emit instructions to calculate the operands.
                     var_left = visit(st, expr.left)
@@ -112,8 +137,7 @@ def generate_ir(
                     # Generate variable to hold the result.
                     var_result = next(new_var)
                     # Emit a Call instruction that writes to that variable.
-                        
-                    
+
                     ins.append(ir.Call(
                         loc, var_op, [var_left, var_right], var_result))
                 return var_result
@@ -182,8 +206,14 @@ def generate_ir(
                 for arg in expr.args:
                     func_args.append(visit(st, arg))
                 return_val = next(new_var)
-                
-                ins.append(ir.Call(loc, st.get_symbol(expr.function_name.name), func_args, return_val))
+
+                ins.append(
+                    ir.Call(
+                        loc,
+                        st.get_symbol(
+                            expr.function_name.name),
+                        func_args,
+                        return_val))
 
                 return return_val
 
@@ -242,7 +272,7 @@ if __name__ == "__main__":
     from compiler.parser import parse
     from compiler.type_checker import typecheck
 
-    code = "var x = 1; x = 2"
+    code = "{1 != 4} or (true or 2 >2)"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()

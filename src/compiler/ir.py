@@ -90,7 +90,9 @@ class LabelGenerator:
         self.__while_start_count = self.__new_label_generator("while_start")
         self.__while_end_count = self.__new_label_generator("while_end")
         self.__while_body_count = self.__new_label_generator("while_body")
-
+        self.__or_skip_count = self.__new_label_generator("or_skip")
+        self.__or_right_count = self.__new_label_generator("or_right")
+        self.__or_end_count = self.__new_label_generator("or_end")
 
     @staticmethod
     def __new_label_generator(text: str) -> Generator[str, None, None]:
@@ -101,7 +103,11 @@ class LabelGenerator:
             yield var_name
             num += 1
 
-    def __create_label(self, loc: Location, generator: Generator[str, None, None]) -> Label:
+    def __create_label(self,
+                       loc: Location,
+                       generator: Generator[str,
+                                            None,
+                                            None]) -> Label:
         name = next(generator)
         return Label(loc, name)
 
@@ -122,3 +128,12 @@ class LabelGenerator:
 
     def get_while_body_label(self, loc: Location) -> Label:
         return self.__create_label(loc, self.__while_body_count)
+
+    def get_or_skip_label(self, loc: Location) -> Label:
+        return self.__create_label(loc, self.__or_skip_count)
+
+    def get_or_right_label(self, loc: Location) -> Label:
+        return self.__create_label(loc, self.__or_right_count)
+
+    def get_or_end_label(self, loc: Location) -> Label:
+        return self.__create_label(loc, self.__or_end_count)
