@@ -47,7 +47,7 @@ def test_variable_type(type_table: SymTab) -> None:
 
 def test_assignmnent_type(type_table: SymTab) -> None:
     parsed = create_ast("var x = 3; x = 45")
-    assert typecheck(parsed, type_table) == Unit
+    assert typecheck(parsed, type_table) == Int
 
 
 def test_wrong_scope_throws(type_table: SymTab) -> None:
@@ -121,7 +121,7 @@ def test_ternary_opeartor_thorws_with_different_return_types(
     parsed = create_ast("var x = 1; if 2 != 4 then false else x = 3")
     with pytest.raises(
         Exception,
-        match=r"Error: If statement's else and then branch return values don't match Bool != Unit",
+        match=r"Error: If statement's else and then branch return values don't match Bool != Int",
     ):
         typecheck(parsed, type_table)
 

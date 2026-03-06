@@ -18,11 +18,12 @@ def typecheck(node: ast.Expression | None,
                 node.type = Bool
                 return Bool
             else:
-                node.type = Bool
+                node.type = Unit
                 return Unit
 
         case ast.Identifier():
             identifier_type = type_table.get_symbol(node.name)
+            node.type = identifier_type
             return identifier_type
 
         case ast.VariableDeclaration():
@@ -62,7 +63,7 @@ def typecheck(node: ast.Expression | None,
                         f"Error: arguments to operator"
                         " {node.op.symbol} must be of same type")
                 if node.op.symbol == "=":
-                    return Unit
+                    return node.type
                 return Bool
             else:
                 function = type_table.get_symbol(node.op.symbol)
@@ -125,11 +126,13 @@ def typecheck(node: ast.Expression | None,
             return function.return_type
 
         case ast.Block():
+
             statements = node.statements
             nested_type_table = symbol_table_factory("types", type_table)
             for statement in statements:
                 typecheck(statement, nested_type_table)
             return_type = typecheck(node.result_expression, nested_type_table)
+            
             node.type = return_type
             return return_type
         case _:

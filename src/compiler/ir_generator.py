@@ -99,16 +99,21 @@ def generate_ir(
                 # Ask the symbol table to return the variable that refers
                 # to the operator to call.
                 var_op = st.get_symbol(expr.op.symbol)
-                # Recursively emit instructions to calculate the operands.
-                var_left = visit(st, expr.left)
-                var_right = visit(st, expr.right)
-                # Generate variable to hold the result.
-                var_result = next(new_var)
-                # Emit a Call instruction that writes to that variable.
                 if expr.op.symbol == "=":
-                    # TODO
-                    pass
+                    var_right = visit(st, expr.right)
+                    assert isinstance(expr.left, ast.Identifier)
+                    var_left = st.get_symbol(expr.left.name)
+                    ins.append(ir.Copy(loc, var_right, var_left))
+                    return var_left
                 else:
+                    # Recursively emit instructions to calculate the operands.
+                    var_left = visit(st, expr.left)
+                    var_right = visit(st, expr.right)
+                    # Generate variable to hold the result.
+                    var_result = next(new_var)
+                    # Emit a Call instruction that writes to that variable.
+                        
+                    
                     ins.append(ir.Call(
                         loc, var_op, [var_left, var_right], var_result))
                 return var_result
@@ -237,7 +242,7 @@ if __name__ == "__main__":
     from compiler.parser import parse
     from compiler.type_checker import typecheck
 
-    code = "var x = {1+1; 2};"
+    code = "var x = 1; x = 2"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
