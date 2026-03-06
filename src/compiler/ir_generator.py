@@ -108,28 +108,48 @@ def generate_ir(
                     return var_left
 
                 elif expr.op.symbol == "or":
-                    result_var = visit(st, expr.left)
+                    result_var = next(new_var)
+                    left_var = visit(st, expr.left)
                     l_or_skip = label_generator.get_or_skip_label(loc)
                     l_or_right = label_generator.get_or_right_label(loc)
                     l_or_end = label_generator.get_or_end_label(loc)
                     ins.append(
                         ir.CondJump(
                             loc,
-                            result_var,
+                            left_var,
                             l_or_skip,
                             l_or_right))
+
                     ins.append(l_or_right)
                     var_right = visit(st, expr.right)
-                    result_var = next(new_var)
                     ins.append(ir.Copy(loc, var_right, result_var))
                     ins.append(ir.Jump(loc, l_or_end))
 
                     ins.append(l_or_skip)
+                    ins.append(ir.Copy(loc, left_var, result_var))
                     ins.append(ir.Jump(loc, l_or_end))
 
                     ins.append(l_or_end)
                     return result_var
+                elif expr.op.symbol == "and":
+                    result_var = next(new_var)
+                    left_var = visit(st, expr.left)
+                    l_and_right = label_generator.get_and_right_label(loc)
+                    l_and_skip = label_generator.get_and_skip_label(loc)
+                    l_and_end = label_generator.get_and_end_label(loc)
+                    ins.append(ir.CondJump(loc, left_var, l_and_right, l_and_skip))
+                    ins.append(l_and_right)
+                    right_var = visit(st, expr.right)
+                    ins.append(ir.Copy(loc, right_var, result_var))
+                    ins.append(ir.Jump(loc, l_and_end))
 
+                    ins.append(l_and_skip)
+                    ins.append(ir.Copy(loc, left_var, result_var))
+                    ins.append(ir.Jump(loc, l_and_end))
+
+                    ins.append(l_and_end)
+
+                    return result_var
                 else:
                     # Recursively emit instructions to calculate the operands.
                     var_left = visit(st, expr.left)
@@ -272,7 +292,7 @@ if __name__ == "__main__":
     from compiler.parser import parse
     from compiler.type_checker import typecheck
 
-    code = "{1 != 4} or (true or 2 >2)"
+    code = "true and true"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()

@@ -93,6 +93,9 @@ class LabelGenerator:
         self.__or_skip_count = self.__new_label_generator("or_skip")
         self.__or_right_count = self.__new_label_generator("or_right")
         self.__or_end_count = self.__new_label_generator("or_end")
+        self.__and_right_count = self.__new_label_generator("and_right")
+        self.__and_skip_count = self.__new_label_generator("and_skip")
+        self.__and_end_count = self.__new_label_generator("and_end")
 
     @staticmethod
     def __new_label_generator(text: str) -> Generator[str, None, None]:
@@ -137,3 +140,12 @@ class LabelGenerator:
 
     def get_or_end_label(self, loc: Location) -> Label:
         return self.__create_label(loc, self.__or_end_count)
+
+    def get_and_right_label(self, loc: Location) -> Label:
+        return self.__create_label(loc, self.__and_right_count)
+
+    def get_and_skip_label(self, loc: Location) -> Label:
+        return self.__create_label(loc, self.__and_skip_count)
+
+    def get_and_end_label(self, loc: Location) -> Label:
+        return self.__create_label(loc, self.__and_end_count)
