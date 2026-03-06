@@ -87,6 +87,9 @@ class LabelGenerator:
         self.__then_count = self.__new_label_generator("then")
         self.__else_count = self.__new_label_generator("else")
         self.__if_end_count = self.__new_label_generator("if_end")
+        self.__while_start_count = self.__new_label_generator("while_start")
+        self.__while_end_count = self.__new_label_generator("while_end")
+        self.__while_body_count = self.__new_label_generator("while_body")
 
 
     @staticmethod
@@ -111,3 +114,11 @@ class LabelGenerator:
     def get_else_label(self, loc: Location) -> Label:
         return self.__create_label(loc, self.__else_count)
 
+    def get_while_start_label(self, loc: Location) -> Label:
+        return self.__create_label(loc, self.__while_start_count)
+
+    def get_while_end_label(self, loc: Location) -> Label:
+        return self.__create_label(loc, self.__while_end_count)
+
+    def get_while_body_label(self, loc: Location) -> Label:
+        return self.__create_label(loc, self.__while_body_count)

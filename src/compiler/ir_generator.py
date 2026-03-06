@@ -29,7 +29,6 @@ def generate_ir(
     new_var = new_var_generator()
 
     label_generator = ir.LabelGenerator()
-        
 
     # We collect the IR instructions that we generate
     # into this list.
@@ -112,13 +111,15 @@ def generate_ir(
                     ins.append(ir.Call(
                         loc, var_op, [var_left, var_right], var_result))
                 return var_result
+
             case ast.TernaryOp():
                 l_then = label_generator.get_then_label(loc)
                 l_end = label_generator.get_if_end_label(loc)
-                l_else: Label | None  = None
+                l_else: Label | None = None
                 if expr.else_ is not None:
                     l_else = label_generator.get_else_label(loc)
                 var_cond = visit(st, expr.cond)
+
                 if expr.else_ is None:
                     # Create (but don't emit) some jump targets.
 
@@ -150,7 +151,26 @@ def generate_ir(
                 # An if-then expression doesn't return anything, so we
                 # return a special variable "unit".
                 return var_unit
-                    
+
+            case ast.WhileStatement():
+                l_while_start = label_generator.get_while_start_label(loc)
+                l_while_body = label_generator.get_while_body_label(loc)
+                l_while_end = label_generator.get_while_end_label(loc)
+                ins.append(l_while_start)
+                var_cond = visit(st, expr.cond)
+                ins.append(
+                    ir.CondJump(
+                        loc,
+                        var_cond,
+                        l_while_body,
+                        l_while_end))
+                ins.append(l_while_body)
+                visit(st, expr.body)
+                ins.append(ir.Jump(loc, l_while_start))
+                ins.append(l_while_end)
+
+                return var_unit
+
             case _:
                 raise ValueError("Not implemented")
              # Other AST node cases (see below)
@@ -198,7 +218,7 @@ if __name__ == "__main__":
     from compiler.parser import parse
     from compiler.type_checker import typecheck
 
-    code = "if true then 1+2 else 1"
+    code = "while true do 1"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
