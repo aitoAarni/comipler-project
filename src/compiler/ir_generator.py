@@ -182,6 +182,14 @@ def generate_ir(
 
                 return return_val
 
+            case ast.Block():
+                block_symbol_table = SymTab[IRVar](st)
+                for arg in expr.statements:
+                    visit(block_symbol_table, arg)
+                return visit(block_symbol_table, expr.result_expression)
+
+            case None:
+                return var_unit
             case _:
                 raise ValueError("Not implemented")
              # Other AST node cases (see below)
@@ -229,7 +237,7 @@ if __name__ == "__main__":
     from compiler.parser import parse
     from compiler.type_checker import typecheck
 
-    code = "print_int(3+4, 3)"
+    code = "var x = {1+1; 2};"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
