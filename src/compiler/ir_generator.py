@@ -73,6 +73,13 @@ def generate_ir(
                 # Look up the IR variable that corresponds to
                 # the source code variable.
                 return st.get_symbol(expr.name)
+            case ast.UnaryOp():
+                var_op = st.get_symbol("unary_" + expr.op.symbol)
+                var_right = visit(st, expr.right)
+                var_result = next(new_var)
+                ins.append(ir.Call(
+                    loc, var_op, [var_right], var_result))
+                return var_result
             case ast.BinaryOp():
                 # Ask the symbol table to return the variable that refers
                 # to the operator to call.
@@ -83,8 +90,12 @@ def generate_ir(
                 # Generate variable to hold the result.
                 var_result = next(new_var)
                 # Emit a Call instruction that writes to that variable.
-                ins.append(ir.Call(
-                    loc, var_op, [var_left, var_right], var_result))
+                if expr.op.symbol == "=":
+                    # TODO
+                    pass
+                else:
+                    ins.append(ir.Call(
+                        loc, var_op, [var_left, var_right], var_result))
                 return var_result
             case ast.TernaryOp():
                 if expr.else_ is None:
@@ -142,7 +153,14 @@ def generate_ir(
                 r_val))
 
     elif root_expr.type == Bool:
-        ...  # Emit a call to 'print_bool'
+        r_val = next(new_var)
+        ins.append(
+            ir.Call(
+                ins[0].location,
+                root_symtab.get_symbol("print_bool"),
+                [var_final_result],
+                r_val))
+
 
     return ins
 
@@ -154,12 +172,13 @@ if __name__ == "__main__":
     from compiler.parser import parse
     from compiler.type_checker import typecheck
 
-    code = "1 + 1"
+    code = "not true"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
     typecheck(parsed, type_table)
     if parsed:
+
         intermediate_representation = generate_ir(set(global_vars), parsed)
         for command in intermediate_representation:
             print(command)
