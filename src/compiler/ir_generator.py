@@ -138,6 +138,7 @@ def generate_ir(
                     # Emit the label that we jump to
                     # when we don't want to go to the "then" branch.
                 else:
+                    assert l_else is not None
                     ins.append(ir.CondJump(loc, var_cond, l_then, l_else))
                     ins.append(l_then)
                     visit(st, expr.then_)

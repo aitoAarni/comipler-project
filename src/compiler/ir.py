@@ -83,7 +83,7 @@ class CondJump(Instruction):
 
 
 class LabelGenerator:
-    def __init__(self):
+    def __init__(self) -> None:
         self.__then_count = self.__new_label_generator("then")
         self.__else_count = self.__new_label_generator("else")
         self.__if_end_count = self.__new_label_generator("if_end")
@@ -98,16 +98,16 @@ class LabelGenerator:
             yield var_name
             num += 1
 
-    def __create_label(self, loc: Location, generator: Callable[[str], Generator[str, None, None]]) -> Label:
+    def __create_label(self, loc: Location, generator: Generator[str, None, None]) -> Label:
         name = next(generator)
         return Label(loc, name)
 
-    def get_then_label(self, loc: Location):
+    def get_then_label(self, loc: Location) -> Label:
         return self.__create_label(loc, self.__then_count)
 
-    def get_if_end_label(self, loc: Location):
+    def get_if_end_label(self, loc: Location) -> Label:
         return self.__create_label(loc, self.__if_end_count)
 
-    def get_else_label(self, loc: Location):
+    def get_else_label(self, loc: Location) -> Label:
         return self.__create_label(loc, self.__else_count)
 
