@@ -2,8 +2,9 @@ from __future__ import annotations
 from compiler.types import FunType
 from collections.abc import Callable
 from typing import Any, Literal, overload
+from compiler.ir import IRVar
 
-type SymTabReturnType = FunType | Callable[..., Any]
+type SymTabReturnType = FunType | Callable[..., Any] | IRVar
 
 
 class SymTab[T: SymTabReturnType]:
@@ -28,6 +29,9 @@ class SymTab[T: SymTabReturnType]:
             return self.parent.get_symbol(symbol)
         else:
             raise Exception(f"There is no variable '{symbol}' declared")
+
+    def contains_symbol(self, symbol: str) -> bool:
+        return symbol in self.symbols.keys()
 
     def __str__(self) -> str:
         return "Symbol table with variables: " + ", ".join(

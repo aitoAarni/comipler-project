@@ -28,13 +28,14 @@ def typecheck(node: ast.Expression | None,
         case ast.VariableDeclaration():
             variable = node.identifier.name
             value = typecheck(node.initializer, type_table)
-            node.type = value
+            node.type = Unit
             if node.var_type is not None:
                 if not value == node.var_type:
                     raise Exception(
-                        f"Error: you can only assign type " f"{
-                            node.var_type} to " f"{
-                            node.identifier.name}, but you tried to assign {value}")
+                        f"Error: you can only assign type "
+                        f"{node.var_type} to "
+                        f"{node.identifier.name}, but you "
+                        f"tried to assign {value}")
 
             type_table.add_symbol(variable, value)
             return Unit
@@ -100,7 +101,7 @@ def typecheck(node: ast.Expression | None,
             if t1 is not Bool:
                 raise Exception(f"Error: condition {node.cond} is not {Bool}")
             t2 = typecheck(node.body, type_table)
-            node.type = t2
+            node.type = Unit
             return t2
 
         case ast.FunctionCall():

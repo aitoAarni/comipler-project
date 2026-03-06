@@ -3,6 +3,7 @@ from compiler.symbol_table import SymTab
 from compiler.types import Bool, Int, Unit
 from compiler.ir import IRVar, Label
 from compiler.utils import create_top_level_type_symbol_table
+from typing import Generator
 
 
 def generate_ir(
@@ -15,7 +16,7 @@ def generate_ir(
     # 'var_unit' is used when an expression's type is 'Unit'.
     var_unit = IRVar('unit')
 
-    def new_var_generator():
+    def new_var_generator() -> Generator[IRVar, None, None]:
         # Create a new unique IR variable
         num = 1
         while True:
@@ -23,6 +24,7 @@ def generate_ir(
             ir_var = IRVar(var_name)
             yield ir_var
             num += 1
+
     new_var = new_var_generator()
 
     def new_label() -> Label:
@@ -43,7 +45,8 @@ def generate_ir(
     # in the interpreter and type checker.
     def visit(st: SymTab[IRVar], expr: ast.Expression) -> IRVar:
         loc = expr.location
-
+        if not loc:
+            raise Exception("Location not defined")
         match expr:
             case ast.Literal():
                 # Create an IR variable to hold the value,
@@ -73,6 +76,17 @@ def generate_ir(
                 # Look up the IR variable that corresponds to
                 # the source code variable.
                 return st.get_symbol(expr.name)
+
+            case ast.VariableDeclaration():
+                if st.contains_symbol(expr.identifier.name):
+                    raise Exception(
+                        f"Error: Variable already declared in this scope: "
+                        f"{expr.identifier.name}")
+                var_initializer = visit(st, expr.initializer)
+                var_result = next(new_var)
+                ins.append(ir.Copy(loc, var_initializer, var_result))
+                st.add_symbol(expr.identifier.name, var_result)
+
             case ast.UnaryOp():
                 var_op = st.get_symbol("unary_" + expr.op.symbol)
                 var_right = visit(st, expr.right)
@@ -143,6 +157,7 @@ def generate_ir(
 
     # Add IR code to print the result, based on the type assigned earlier
     # by the type checker.
+    print(f"Root expr: {root_expr}")
     if root_expr.type == Int:
         r_val = next(new_var)
         ins.append(
@@ -161,7 +176,6 @@ def generate_ir(
                 [var_final_result],
                 r_val))
 
-
     return ins
 
 
@@ -172,7 +186,7 @@ if __name__ == "__main__":
     from compiler.parser import parse
     from compiler.type_checker import typecheck
 
-    code = "not true"
+    code = "var x = 1; var x = 3"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
