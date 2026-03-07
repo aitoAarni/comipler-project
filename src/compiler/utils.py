@@ -59,6 +59,7 @@ def create_top_level_variable_symbol_table() -> SymTab[Callable[..., Any]]:
     st.add_symbol("or", lambda a, b: a or b)
     st.add_symbol("print_int", print)
     st.add_symbol("print_bool", print)
+    st.add_symbol("read_int", input)
     return st
 
 
@@ -79,6 +80,7 @@ def create_top_level_type_symbol_table() -> SymTab[FunType]:
     st.add_symbol("or", FunType([Bool, Bool], Bool))
     st.add_symbol("print_int", FunType([Int], Unit))
     st.add_symbol("print_bool", FunType([Bool], Unit))
+    st.add_symbol("read_int", FunType([], Int))
     return st
 
 

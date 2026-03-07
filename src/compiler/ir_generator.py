@@ -137,7 +137,12 @@ def generate_ir(
                     l_and_right = label_generator.get_and_right_label(loc)
                     l_and_skip = label_generator.get_and_skip_label(loc)
                     l_and_end = label_generator.get_and_end_label(loc)
-                    ins.append(ir.CondJump(loc, left_var, l_and_right, l_and_skip))
+                    ins.append(
+                        ir.CondJump(
+                            loc,
+                            left_var,
+                            l_and_right,
+                            l_and_skip))
                     ins.append(l_and_right)
                     right_var = visit(st, expr.right)
                     ins.append(ir.Copy(loc, right_var, result_var))
@@ -285,14 +290,24 @@ def generate_ir(
     return ins
 
 
-global_vars = "unary_- unary_not + - * / % < <= > >= != == and or print_int print_bool =".split()
+global_vars = "unary_- unary_not + - * / % < <= > >= != == and or print_int print_bool read_int =".split()
 
 if __name__ == "__main__":
     from compiler.tokenizer import tokenizer
     from compiler.parser import parse
     from compiler.type_checker import typecheck
 
-    code = "true and true"
+    code = """var n: Int = read_int();
+print_int(n);
+while n > 1 do {
+    if n % 2 == 0 then {
+        n = n / 2;
+    } else {
+        n = 3*n + 1;
+    }
+    print_int(n);
+}
+"""
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
