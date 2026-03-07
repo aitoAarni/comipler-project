@@ -289,12 +289,12 @@ def generate_ir(
     return ins
 
 
-global_vars = "unary_- unary_not + - * / % < <= > >= != == and or print_int print_bool read_int =".split()
 
 if __name__ == "__main__":
     from compiler.tokenizer import tokenizer
     from compiler.parser import parse
     from compiler.type_checker import typecheck
+    from compiler.utils import GLOBAL_VARS
 
     code = """
 var x = 1; var y = 2; {var x = 2; var z = 3;}
@@ -306,7 +306,7 @@ var x = 1; var y = 2; {var x = 2; var z = 3;}
     if parsed:
         ir_sym_tab = SymTab[IRVar](parent=None)
         intermediate_representation = generate_ir(
-            set(global_vars), parsed, ir_sym_tab)
+            set(GLOBAL_VARS), parsed, ir_sym_tab)
         print(ir_sym_tab.locals)
         for command in intermediate_representation:
             print(command)

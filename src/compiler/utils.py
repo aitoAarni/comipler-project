@@ -83,6 +83,7 @@ def create_top_level_type_symbol_table() -> SymTab[FunType]:
     st.add_symbol("read_int", FunType([], Int))
     return st
 
+GLOBAL_VARS = "unary_- unary_not + - * / % < <= > >= != == and or print_int print_bool read_int =".split()
 
 def convert_boolean_literal(literal: str) -> bool:
     if literal == "true":
