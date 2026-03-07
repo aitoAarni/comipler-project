@@ -252,7 +252,6 @@ def generate_ir(
                 return var_unit
             case _:
                 raise ValueError("Not implemented")
-             # Other AST node cases (see below)
 
     # We start with a SymTab that maps all available global names
     # like 'print_int' to IR variables of the same name.
