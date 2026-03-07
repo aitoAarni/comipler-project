@@ -11,11 +11,12 @@ class SymTab[T: SymTabReturnType]:
     def __init__(self, parent: SymTab | None = None):
         self.symbols: dict[str, T] = {}
         self.parent = parent
+        self.locals: list[T] = []
 
-    def add_symbol(self, identifier: str, value: Any) -> None:
+    def add_symbol(self, identifier: str, value: T) -> None:
         self.symbols[identifier] = value
 
-    def update_symbol(self, identifier: str, value: Any) -> None:
+    def update_symbol(self, identifier: str, value: T) -> None:
         if identifier in self.symbols:
             return self.add_symbol(identifier, value)
         elif self.parent:
@@ -32,6 +33,12 @@ class SymTab[T: SymTabReturnType]:
 
     def contains_symbol(self, symbol: str) -> bool:
         return symbol in self.symbols.keys()
+
+    def add_local(self, identifier: T) -> None:
+        if self.parent:
+            self.parent.add_local(identifier)
+        else:
+            self.locals.append(identifier)
 
     def __str__(self) -> str:
         return "Symbol table with variables: " + ", ".join(

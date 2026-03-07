@@ -13,7 +13,8 @@ def generate_ir(
     # like 'print_int' and '+'. You can get them from
     # the global symbol table of your interpreter or type checker.
     reserved_names: set[str],
-    root_expr: ast.Expression
+    root_expr: ast.Expression,
+    root_symtab: SymTab[IRVar]
 ) -> list[ir.Instruction]:
     # 'var_unit' is used when an expression's type is 'Unit'.
     var_unit = IRVar('unit')
@@ -87,6 +88,7 @@ def generate_ir(
                 var_result = next(new_var)
                 ins.append(ir.Copy(loc, var_initializer, var_result))
                 st.add_symbol(expr.identifier.name, var_result)
+                st.add_local(var_result)
 
             case ast.UnaryOp():
                 var_op = st.get_symbol("unary_" + expr.op.symbol)
@@ -259,13 +261,11 @@ def generate_ir(
     # actual implementations for these globals. For now,
     # they just need to exist so the variable lookups work,
     # and clashing variable names can be avoided.
-    root_symtab = SymTab[IRVar](parent=None)
     for name in reserved_names:
         root_symtab.add_symbol(name, IRVar(name))
 
     # Start visiting the AST from the root.
     var_final_result = visit(root_symtab, root_expr)
-
     # Add IR code to print the result, based on the type assigned earlier
     # by the type checker.
     if root_expr.type == Int:
@@ -296,23 +296,17 @@ if __name__ == "__main__":
     from compiler.parser import parse
     from compiler.type_checker import typecheck
 
-    code = """var n: Int = read_int();
-print_int(n);
-while n > 1 do {
-    if n % 2 == 0 then {
-        n = n / 2;
-    } else {
-        n = 3*n + 1;
-    }
-    print_int(n);
-}
+    code = """
+var x = 1; var y = 2; {var x = 2; var z = 3;}
 """
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
     typecheck(parsed, type_table)
     if parsed:
-
-        intermediate_representation = generate_ir(set(global_vars), parsed)
+        ir_sym_tab = SymTab[IRVar](parent=None)
+        intermediate_representation = generate_ir(
+            set(global_vars), parsed, ir_sym_tab)
+        print(ir_sym_tab.locals)
         for command in intermediate_representation:
             print(command)
