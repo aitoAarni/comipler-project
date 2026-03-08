@@ -21,13 +21,19 @@ def call_compiler(source_code: str) -> bytes:
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
     typecheck(parsed, type_table)
+    print("parsed")
+    print(parsed)
+    print()
     assert parsed is not None
     ir_gen = IrGenerator(set(GLOBAL_VARS), parsed)
+
     intermediate_representation = ir_gen.generate_ir()
+    for i in intermediate_representation:
+        print(i)
     assembly_code = generate_assembly(
         intermediate_representation,
         ir_gen.get_locals())
-    print(f"Assembly code:\n{assembly_code}")
+    # print(f"Assembly code:\n{assembly_code}")
     executable = assemble_and_get_executable(assembly_code)
     return executable
     # Call your compiler here and return the compiled executable.

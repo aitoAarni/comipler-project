@@ -65,7 +65,7 @@ def generate_assembly(
             case ir.LoadBoolConst():
                 emit(
                     f"movq $"
-                    f"{1 if insn.value else 0} "
+                    f"{1 if insn.value else 0}, "
                     f"{locals.get_ref(insn.dest)}")
                 continue
             case ir.Copy():

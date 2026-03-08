@@ -53,7 +53,6 @@ def typecheck(node: ast.Expression | None,
 
         case ast.BinaryOp():
             t1 = typecheck(node.left, type_table)
-            node.type = t1
 
             t2 = typecheck(node.right, type_table)
 
@@ -63,10 +62,13 @@ def typecheck(node: ast.Expression | None,
                         f"Error: arguments to operator"
                         " {node.op.symbol} must be of same type")
                 if node.op.symbol == "=":
+                    node.type = t1
                     return node.type
+                node.type = Bool
                 return Bool
             else:
                 function = type_table.get_symbol(node.op.symbol)
+                node.type = function.return_type
 
                 if t1 != function.arg_types[0] or t2 != function.arg_types[1]:
                     raise Exception(
@@ -132,7 +134,7 @@ def typecheck(node: ast.Expression | None,
             for statement in statements:
                 typecheck(statement, nested_type_table)
             return_type = typecheck(node.result_expression, nested_type_table)
-            
+
             node.type = return_type
             return return_type
         case _:
