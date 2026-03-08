@@ -310,6 +310,7 @@ def get_all_ir_variables(instructions: list[ir.Instruction]) -> list[ir.IRVar]:
                         add(v)
     return result_list
 
+
 if __name__ == "__main__":
     from compiler.tokenizer import tokenizer
     from compiler.parser import parse
@@ -317,7 +318,7 @@ if __name__ == "__main__":
     from compiler.utils import GLOBAL_VARS
 
     code = """
-    var x = 1; x+1
+    { var x = true; if x then 1 else 2; }
     """
     tokens = tokenizer(code)
     parsed = parse(tokens)
