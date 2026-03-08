@@ -195,23 +195,29 @@ class IrGenerator:
                         # the "then" branch.
                         ins.append(l_then)
                         # Recursively emit instructions for the "then" branch.
-                        visit(st, expr.then_)
+                        result = visit(st, expr.then_)
 
+                        ins.append(l_end)
+                        return result
                         # Emit the label that we jump to
                         # when we don't want to go to the "then" branch.
                     else:
                         assert l_else is not None
+                        result = next(new_var)
                         ins.append(ir.CondJump(loc, var_cond, l_then, l_else))
                         ins.append(l_then)
-                        visit(st, expr.then_)
+                        result1 = visit(st, expr.then_)
+                        ins.append(ir.Copy(loc, result1, result))
+                        ins.append(ir.Jump(loc, l_end))
                         ins.append(l_else)
-                        visit(st, expr.else_)
-
-                    ins.append(l_end)
+                        result2 = visit(st, expr.else_)
+                        ins.append(ir.Copy(loc, result2, result))
+                        ins.append(ir.Jump(loc, l_end))
+                        ins.append(l_end)
+                        return result
 
                     # An if-then expression doesn't return anything, so we
                     # return a special variable "unit".
-                    return var_unit
 
                 case ast.WhileStatement():
                     l_while_start = label_generator.get_while_start_label(loc)
@@ -263,6 +269,7 @@ class IrGenerator:
             self.root_symtab.add_symbol(name, IRVar(name))
 
         var_final_result = visit(self.root_symtab, self.root_expr)
+        print(f"var_final_result: {var_final_result}")
         if self.root_expr.type == Int:
             r_val = next(new_var)
             ins.append(
@@ -312,7 +319,7 @@ if __name__ == "__main__":
     from compiler.utils import GLOBAL_VARS
 
     code = """
-    true or true
+    if 1 < 2 then 2 else 3
     """
     tokens = tokenizer(code)
     parsed = parse(tokens)
@@ -323,5 +330,3 @@ if __name__ == "__main__":
         intermediate_representation = ir_gen.generate_ir()
         for command in intermediate_representation:
             print(command)
-        print("locals", ir_gen.get_locals())
-        print(f"vars: {get_all_ir_variables(intermediate_representation)}")

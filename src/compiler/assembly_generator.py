@@ -60,6 +60,7 @@ def generate_assembly(
                     emit(f'movq ${insn.value}, {locals.get_ref(insn.dest)}')
                 else:
                     emit(f'movabsq ${insn.value}, %rax')
+                    emit(f'movq %rax, {locals.get_ref(insn.dest)}')
                 continue
 
             case ir.LoadBoolConst():

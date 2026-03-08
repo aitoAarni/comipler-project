@@ -97,6 +97,7 @@ def typecheck(node: ast.Expression | None,
                     f"Error: If statement's else and then branch return values"
                     f" don't match {t2} != {t3}"
                 )
+            node.type = t2
             return t2
 
         case ast.WhileStatement():
@@ -104,7 +105,7 @@ def typecheck(node: ast.Expression | None,
             if t1 is not Bool:
                 raise Exception(f"Error: condition {node.cond} is not {Bool}")
             t2 = typecheck(node.body, type_table)
-            node.type = Unit
+            node.type = t2
             return t2
 
         case ast.FunctionCall():
