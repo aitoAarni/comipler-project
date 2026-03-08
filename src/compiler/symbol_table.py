@@ -39,6 +39,11 @@ class SymTab[T: SymTabReturnType]:
             self.parent.add_local(identifier)
         else:
             self.locals.append(identifier)
+        
+    def get_locals(self) -> list[T]:
+        if self.parent:
+            return self.parent.get_locals()
+        return self.locals
 
     def __str__(self) -> str:
         return "Symbol table with variables: " + ", ".join(
