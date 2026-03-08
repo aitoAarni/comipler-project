@@ -311,7 +311,7 @@ if __name__ == "__main__":
     from compiler.utils import GLOBAL_VARS
 
     code = """
-    1 + 1
+    true or true
     """
     tokens = tokenizer(code)
     parsed = parse(tokens)

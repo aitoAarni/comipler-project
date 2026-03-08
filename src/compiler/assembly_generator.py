@@ -22,13 +22,15 @@ class Locals:
         return self._stack_used
 
 
-def generate_assembly(instructions: list[ir.Instruction], local_vars: list[ir.IRVar]) -> str:
+def generate_assembly(
+        instructions: list[ir.Instruction], local_vars: list[ir.IRVar]) -> str:
     lines = []
     def emit(line: str) -> None: lines.append(line)
 
     locals = Locals(
         local_vars
     )
+    call_regs = "rdi rsi rdx rcx r8 r9".split()
 
     # ... Emit initial declarations and stack setup here ...
     emit("pushq %rbp")
@@ -67,7 +69,7 @@ def generate_assembly(instructions: list[ir.Instruction], local_vars: list[ir.IR
                 emit(f"movq {locals.get_ref(insn.source)}, %rax")
                 emit(f"movq %rax, {locals.get_ref(insn.dest)}")
                 continue
-                        
+
             case ir.CondJump():
                 emit(f"cmpq $0, {locals.get_ref(insn.cond)}")
                 emit(f"jne .L{insn.then_label.name}")
@@ -81,11 +83,11 @@ def generate_assembly(instructions: list[ir.Instruction], local_vars: list[ir.IR
                 result = locals.get_ref(insn.dest)
                 match insn.fun.name:
                     case "unary_-":
-                        emit(f"movq {args[0]}, %rax")                        
-                        emit(f"negq %rax")                        
-                        emit(f"movq %rax, {result}")                        
+                        emit(f"movq {args[0]}, %rax")
+                        emit(f"negq %rax")
+                        emit(f"movq %rax, {result}")
                         continue
-                        
+
                     case "unary_not":
                         emit(f"movq {args[0]}, %rax")
                         emit(f"xorq $1, %rax")
@@ -161,6 +163,11 @@ def generate_assembly(instructions: list[ir.Instruction], local_vars: list[ir.IR
                         emit(f"sete %al")
                         emit(f"movq %rax, {result}")
                         continue
+                    case _:
+                        for i, arg in enumerate(args):
+                            emit(f"movq {arg}, %{call_regs[i]}")
+                        emit(f"callq {insn.fun.name}")
+                        emit(f"movq %rax, {result}")
 
     emit(f"movq %rbp, %rsp")
     emit(f"popq %rbp")
@@ -177,12 +184,14 @@ if __name__ == "__main__":
     from compiler.ir_generator import IrGenerator
     from compiler.utils import create_top_level_type_symbol_table
 
-    code = "1 == 4"
+    code = "print_int(1)"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
     typecheck(parsed, type_table)
     ir_gen = IrGenerator(set(GLOBAL_VARS), parsed)
-    intermediate_representation = ir_gen.generate_ir()   
-    for line in generate_assembly(intermediate_representation, ir_gen.get_locals()):
+    intermediate_representation = ir_gen.generate_ir()
+    for line in generate_assembly(
+            intermediate_representation,
+            ir_gen.get_locals()):
         print(line)
