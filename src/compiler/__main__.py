@@ -6,13 +6,32 @@ from socketserver import ForkingTCPServer, StreamRequestHandler
 from traceback import format_exception
 from typing import Any
 
+from compiler.tokenizer import tokenizer
+from compiler.parser import parse
+from compiler.type_checker import typecheck
+from compiler.utils import GLOBAL_VARS
+from compiler.ir_generator import IrGenerator
+from compiler.utils import create_top_level_type_symbol_table
+from compiler.assembly_generator import generate_assembly
+from compiler.assembler import assemble_and_get_executable
+
 
 def call_compiler(source_code: str) -> bytes:
-    # *** TODO ***
+    tokens = tokenizer(source_code)
+    parsed = parse(tokens)
+    type_table = create_top_level_type_symbol_table()
+    typecheck(parsed, type_table)
+    ir_gen = IrGenerator(set(GLOBAL_VARS), parsed)
+    intermediate_representation = ir_gen.generate_ir()
+    assembly_code = generate_assembly(
+        intermediate_representation,
+        ir_gen.get_locals())
+    executable = assemble_and_get_executable(assembly_code)
+    return executable
     # Call your compiler here and return the compiled executable.
     # Raise an exception on compilation error.
     # *** TODO ***
-    raise NotImplementedError("Compiler not implemented")
+    # raise NotImplementedError("Compiler not implemented")
 
 
 def main() -> int:
@@ -40,7 +59,10 @@ def main() -> int:
 
     valid_commands = ['compile', 'serve']
     if command is None:
-        print(f"Error: command argument missing. Valid commands: {', '.join(valid_commands)}", file=sys.stderr)
+        print(
+            f"Error: command argument missing. Valid commands: {
+                ', '.join(valid_commands)}",
+            file=sys.stderr)
         return 1
 
     if command not in valid_commands:

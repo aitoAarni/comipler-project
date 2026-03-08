@@ -1,5 +1,4 @@
 import compiler.ir as ir
-from compiler.ir_generator import get_all_ir_variables
 
 
 class Locals:
@@ -33,9 +32,18 @@ def generate_assembly(
     call_regs = "rdi rsi rdx rcx r8 r9".split()
 
     # ... Emit initial declarations and stack setup here ...
+    emit(".extern print_int")
+    emit(".extern print_bool")
+    emit(".extern read_int")
+    emit(".global main")
+    emit(".type main, @function")
+
+    emit(".section .text")
+    emit("main:")
+
     emit("pushq %rbp")
     emit("movq %rsp, %rbp")
-    emit(f"subq  ${locals._stack_used + 8}, %rsp")
+    emit(f"subq  ${locals._stack_used}, %rsp")
 
     for insn in instructions:
         emit('\n# ' + str(insn))
@@ -51,11 +59,6 @@ def generate_assembly(
                 if -2**31 <= insn.value < 2**31:
                     emit(f'movq ${insn.value}, {locals.get_ref(insn.dest)}')
                 else:
-                    # Due to a quirk of x86-64, we must use
-                    # a different instruction for large integers.
-                    # It can only write to a register,
-                    # not a memory location, so we use %rax
-                    # as a temporary.
                     emit(f'movabsq ${insn.value}, %rax')
                 continue
 
@@ -169,6 +172,9 @@ def generate_assembly(
                         emit(f"callq {insn.fun.name}")
                         emit(f"movq %rax, {result}")
 
+
+    emit(f"")
+    emit(f"movq $0, %rax")
     emit(f"movq %rbp, %rsp")
     emit(f"popq %rbp")
     emit(f"ret")
@@ -184,7 +190,7 @@ if __name__ == "__main__":
     from compiler.ir_generator import IrGenerator
     from compiler.utils import create_top_level_type_symbol_table
 
-    code = "print_int(1)"
+    code = "var x = 2; x+x; 3+2; var y = x = x * 3"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
