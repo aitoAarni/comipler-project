@@ -90,6 +90,16 @@ def generate_assembly(instructions: list[ir.Instruction], local_vars: list[ir.IR
                         emit(f"movq {args[0]}, %rax")
                         emit(f"xorq $1, %rax")
                         emit(f"movq %rax, {result}")
+                        continue
+                    case "+":
+                        emit(f"movq {args[0]}, %rax")
+                        emit(f"addq {args[1]}, %rax")
+                        emit(f"movq %rax, {result}")
+                    case "-":
+                        emit(f"movq {args[0]}, %rax")
+                        emit(f"subq {args[1]}, %rax")
+                        emit(f"movq %rax, {result}")
+
 
     emit(f"movq %rbp, %rsp")
     emit(f"popq %rbp")
@@ -106,7 +116,7 @@ if __name__ == "__main__":
     from compiler.ir_generator import IrGenerator
     from compiler.utils import create_top_level_type_symbol_table
 
-    code = "not true"
+    code = "1-1"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
