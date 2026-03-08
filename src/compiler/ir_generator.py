@@ -4,6 +4,7 @@ from compiler.types import Bool, Int, Unit
 from compiler.ir import IRVar, Label
 from compiler.utils import create_top_level_type_symbol_table
 from typing import Generator
+import dataclasses
 
 # TODO add 'and' and 'or' keyowrds to work properly
 
@@ -14,7 +15,6 @@ def generate_ir(
     # the global symbol table of your interpreter or type checker.
     reserved_names: set[str],
     root_expr: ast.Expression,
-    root_symtab: SymTab[IRVar]
 ) -> list[ir.Instruction]:
     # 'var_unit' is used when an expression's type is 'Unit'.
     var_unit = IRVar('unit')
@@ -261,6 +261,7 @@ def generate_ir(
     # actual implementations for these globals. For now,
     # they just need to exist so the variable lookups work,
     # and clashing variable names can be avoided.
+    root_symtab = SymTab[ir.IRVar]()
     for name in reserved_names:
         root_symtab.add_symbol(name, IRVar(name))
 
@@ -289,6 +290,25 @@ def generate_ir(
     return ins
 
 
+def get_all_ir_variables(instructions: list[ir.Instruction]) -> list[ir.IRVar]:
+    result_list: list[ir.IRVar] = []
+    result_set: set[ir.IRVar] = set()
+
+    def add(v: ir.IRVar) -> None:
+        if v not in result_set:
+            result_list.append(v)
+            result_set.add(v)
+
+    for insn in instructions:
+        for field in dataclasses.fields(insn):
+            value = getattr(insn, field.name)
+            if isinstance(value, ir.IRVar):
+                add(value)
+            elif isinstance(value, list):
+                for v in value:
+                    if isinstance(v, ir.IRVar):
+                        add(v)
+    return result_list
 
 if __name__ == "__main__":
     from compiler.tokenizer import tokenizer
@@ -297,16 +317,15 @@ if __name__ == "__main__":
     from compiler.utils import GLOBAL_VARS
 
     code = """
-var x = 1; var y = 2; {var x = 2; var z = 3;}
-"""
+    var x = 1; x+1
+    """
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
     typecheck(parsed, type_table)
     if parsed:
-        ir_sym_tab = SymTab[IRVar](parent=None)
         intermediate_representation = generate_ir(
-            set(GLOBAL_VARS), parsed, ir_sym_tab)
-        print(ir_sym_tab.locals)
+            set(GLOBAL_VARS), parsed)
         for command in intermediate_representation:
             print(command)
+    print(f"vars: {get_all_ir_variables(intermediate_representation)}")
