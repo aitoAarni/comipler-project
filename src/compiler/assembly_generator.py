@@ -11,9 +11,17 @@ class Locals:
             x: f"-{(i + 1) * 8}(%rbp)" for i, x in enumerate(variables)}
         self._stack_used = len(variables) * 8
 
-    def get_ref(self, v: ir.IRVar) -> str:
+    def get_ref(self, v: ir.IRVar, plain: bool = True) -> str:
         """Returns an Assembly reference like `-24(%rbp)`
         for the memory location that stores the given variable"""
+        if v.name == "unit":
+            return "$0"
+        elif v.name == "print_int":
+            return "print_int" if plain else "$print_int"
+        elif v.name == "print_bool":
+            return "print_bool" if plain else "$print_bool"
+        elif v.name == "read_int":
+            return "read_int" if plain else "$read_int"
         return self._var_to_location[v]
 
     def stack_used(self) -> int:
@@ -70,7 +78,7 @@ def generate_assembly(
                     f"{locals.get_ref(insn.dest)}")
                 continue
             case ir.Copy():
-                emit(f"movq {locals.get_ref(insn.source)}, %rax")
+                emit(f"movq {locals.get_ref(insn.source, False)}, %rax")
                 emit(f"movq %rax, {locals.get_ref(insn.dest)}")
                 continue
 
@@ -170,9 +178,8 @@ def generate_assembly(
                     case _:
                         for i, arg in enumerate(args):
                             emit(f"movq {arg}, %{call_regs[i]}")
-                        emit(f"callq {insn.fun.name}")
+                        emit(f"callq {locals.get_ref(insn.fun)}")
                         emit(f"movq %rax, {result}")
-
 
     emit(f"")
     emit(f"movq $0, %rax")
@@ -191,7 +198,7 @@ if __name__ == "__main__":
     from compiler.ir_generator import IrGenerator
     from compiler.utils import create_top_level_type_symbol_table
 
-    code = "var x = 2; x+x; 3+2; var y = x = x * 3"
+    code = "var x = print_int; x(4)"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
@@ -199,7 +206,10 @@ if __name__ == "__main__":
     if parsed:
         ir_gen = IrGenerator(set(GLOBAL_VARS), parsed)
         intermediate_representation = ir_gen.generate_ir()
-        for line in generate_assembly(
-                intermediate_representation,
-                ir_gen.get_locals()):
-            print(line)
+        assembly = generate_assembly(
+            intermediate_representation,
+            ir_gen.get_locals())
+
+        print(assembly)
+        # for line in assembly:
+        # print(line)

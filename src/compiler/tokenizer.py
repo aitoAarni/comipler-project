@@ -47,7 +47,8 @@ def tokenize_line(source_code: str, line_number: int) -> list[Token]:
                     int_literal_re,
                 ]:
 
-                    raise Exception(f"Invalid syntax. Could not tokenize {source_code}")
+                    raise Exception(
+                        f"Invalid syntax. Could not tokenize {source_code}")
                 else:
                     reqiure_non_identifier_char_after = False
 

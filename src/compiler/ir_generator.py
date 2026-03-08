@@ -243,15 +243,15 @@ class IrGenerator:
                     for arg in expr.args:
                         func_args.append(visit(st, arg))
                     return_val = next(new_var)
-
+                    function_var = st.get_symbol(
+                                expr.function_name.name)
+                    
                     ins.append(
                         ir.Call(
                             loc,
-                            st.get_symbol(
-                                expr.function_name.name),
+                            function_var,
                             func_args,
                             return_val))
-
                     return return_val
 
                 case ast.Block():
@@ -269,7 +269,6 @@ class IrGenerator:
             self.root_symtab.add_symbol(name, IRVar(name))
 
         var_final_result = visit(self.root_symtab, self.root_expr)
-        print(f"var_final_result: {var_final_result}")
         if self.root_expr.type == Int:
             r_val = next(new_var)
             ins.append(
@@ -319,7 +318,8 @@ if __name__ == "__main__":
     from compiler.utils import GLOBAL_VARS
 
     code = """
-    if 1 < 2 then 2 else 3
+    var x = print_int;
+    x(4)
     """
     tokens = tokenizer(code)
     parsed = parse(tokens)
@@ -328,5 +328,7 @@ if __name__ == "__main__":
     if parsed:
         ir_gen = IrGenerator(set(GLOBAL_VARS), parsed)
         intermediate_representation = ir_gen.generate_ir()
+        
         for command in intermediate_representation:
             print(command)
+        print("locals: ", ir_gen.get_locals())

@@ -248,13 +248,12 @@ class Parser:
             arg_token = self.consume()
             arg_type = convert_token_to_type(arg_token)
             function_args.append(arg_type)
-        self.consume(")") 
+        self.consume(")")
         self.consume("=")
         self.consume(">")
         function_return_token = self.consume()
         function_return_type = convert_token_to_type(function_return_token)
         return FunType(function_args, function_return_type)
-
 
     def parse_var_declaration(self) -> ast.VariableDeclaration:
         if not self.allow_var_declaration:
@@ -270,7 +269,7 @@ class Parser:
         var_type: FunType | PrimitiveType | None = None
         if self.peek().text == ":":
             var_type = self._parse_variable_type()
-            
+
         self.consume("=")
         initializer = self.parse_expression()
         return ast.VariableDeclaration(
@@ -301,7 +300,7 @@ class Parser:
             if next_token == "}":
                 result_expression = statement
                 break
-            elif next_token == "{":
+            elif next_token == "{" and isinstance(statement, ast.Block):
                 statements.append(statement)
                 self.consume("{")
                 nested_block = self.parse_expression(True)
@@ -357,6 +356,6 @@ def check_is_identifier(
 
 
 if __name__ == "__main__":
-    tokens = tokenizer("var a: (Int) => Unit = print_int")
+    tokens = tokenizer("var x = print_int; x(4)")
     parsed = parse(tokens)
     print(parsed)
