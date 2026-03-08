@@ -112,6 +112,55 @@ def generate_assembly(instructions: list[ir.Instruction], local_vars: list[ir.IR
                         emit(f"idivq {args[1]}")
                         emit(f"movq %rax, {result}")
                         continue
+                    case "%":
+                        emit(f"movq {args[0]}, %rax")
+                        emit(f"cqto")
+                        emit(f"idivq {args[1]}")
+                        emit(f"movq %rdx, %rax")
+                        emit(f"movq %rax, {result}")
+                        continue
+                    case "<":
+                        emit(f"xor %rax, %rax")
+                        emit(f"movq {args[0]}, %rdx")
+                        emit(f"cmpq {args[1]}, %rdx")
+                        emit(f"setl %al")
+                        emit(f"movq %rax, {result}")
+                        continue
+                    case ">":
+                        emit(f"xor %rax, %rax")
+                        emit(f"movq {args[0]}, %rdx")
+                        emit(f"cmpq {args[1]}, %rdx")
+                        emit(f"setg %al")
+                        emit(f"movq %rax, {result}")
+                        continue
+                    case "<=":
+                        emit(f"xor %rax, %rax")
+                        emit(f"movq {args[0]}, %rdx")
+                        emit(f"cmpq {args[1]}, %rdx")
+                        emit(f"setle %al")
+                        emit(f"movq %rax, {result}")
+                        continue
+                    case ">=":
+                        emit(f"xor %rax, %rax")
+                        emit(f"movq {args[0]}, %rdx")
+                        emit(f"cmpq {args[1]}, %rdx")
+                        emit(f"setge %al")
+                        emit(f"movq %rax, {result}")
+                        continue
+                    case "!=":
+                        emit(f"xor %rax, %rax")
+                        emit(f"movq {args[0]}, %rdx")
+                        emit(f"cmpq {args[1]}, %rdx")
+                        emit(f"setne %al")
+                        emit(f"movq %rax, {result}")
+                        continue
+                    case "==":
+                        emit(f"xor %rax, %rax")
+                        emit(f"movq {args[0]}, %rdx")
+                        emit(f"cmpq {args[1]}, %rdx")
+                        emit(f"sete %al")
+                        emit(f"movq %rax, {result}")
+                        continue
 
     emit(f"movq %rbp, %rsp")
     emit(f"popq %rbp")
@@ -128,7 +177,7 @@ if __name__ == "__main__":
     from compiler.ir_generator import IrGenerator
     from compiler.utils import create_top_level_type_symbol_table
 
-    code = "1/4"
+    code = "1 == 4"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
