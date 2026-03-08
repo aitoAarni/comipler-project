@@ -23,7 +23,7 @@ class Locals:
 
 def generate_assembly(
         instructions: list[ir.Instruction], local_vars: list[ir.IRVar]) -> str:
-    lines = []
+    lines: list[str] = []
     def emit(line: str) -> None: lines.append(line)
 
     locals = Locals(
@@ -178,7 +178,7 @@ def generate_assembly(
     emit(f"movq %rbp, %rsp")
     emit(f"popq %rbp")
     emit(f"ret")
-    return lines
+    return "\n".join(lines) + "\n"
 
 
 if __name__ == "__main__":
@@ -195,9 +195,10 @@ if __name__ == "__main__":
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
     typecheck(parsed, type_table)
-    ir_gen = IrGenerator(set(GLOBAL_VARS), parsed)
-    intermediate_representation = ir_gen.generate_ir()
-    for line in generate_assembly(
-            intermediate_representation,
-            ir_gen.get_locals()):
-        print(line)
+    if parsed:
+        ir_gen = IrGenerator(set(GLOBAL_VARS), parsed)
+        intermediate_representation = ir_gen.generate_ir()
+        for line in generate_assembly(
+                intermediate_representation,
+                ir_gen.get_locals()):
+            print(line)

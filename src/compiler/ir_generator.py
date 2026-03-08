@@ -91,6 +91,7 @@ class IrGenerator:
                     var_result = next(new_var)
                     ins.append(ir.Copy(loc, var_initializer, var_result))
                     st.add_symbol(expr.identifier.name, var_result)
+                    return var_unit
 
                 case ast.UnaryOp():
                     var_op = st.get_symbol("unary_" + expr.op.symbol)
@@ -317,9 +318,10 @@ if __name__ == "__main__":
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
     typecheck(parsed, type_table)
-    ir_gen = IrGenerator(set(GLOBAL_VARS), parsed)
-    intermediate_representation = ir_gen.generate_ir()
-    for command in intermediate_representation:
-        print(command)
-    print("locals", ir_gen.get_locals())
-    print(f"vars: {get_all_ir_variables(intermediate_representation)}")
+    if parsed:
+        ir_gen = IrGenerator(set(GLOBAL_VARS), parsed)
+        intermediate_representation = ir_gen.generate_ir()
+        for command in intermediate_representation:
+            print(command)
+        print("locals", ir_gen.get_locals())
+        print(f"vars: {get_all_ir_variables(intermediate_representation)}")
