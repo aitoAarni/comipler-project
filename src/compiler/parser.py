@@ -200,7 +200,7 @@ class Parser:
             )
 
     def parse_keyword(
-            self) -> ast.TernaryOp | ast.WhileStatement | ast.VariableDeclaration:
+            self) -> ast.TernaryOp | ast.WhileStatement | ast.VariableDeclaration | ast.ContinueStatement | ast.BreakStatement:
         if self.peek().text == "if":
             parse
             return self.parse_if_statement()
@@ -208,10 +208,15 @@ class Parser:
             return self.parse_while_statement()
         elif self.peek().text == "var":
             return self.parse_var_declaration()
+        elif self.peek().text == "break":
+            return self.parse_break_statement()
+        elif self.peek().text == "continue":
+            return self.parse_continue_statement()
         else:
             raise Exception(
                 f"Keyowrd "
                 f"{self.peek().text} is not handled in parser")
+
 
     def parse_if_statement(self) -> ast.TernaryOp:
         self.consume("if")
@@ -235,6 +240,14 @@ class Parser:
         body = self.parse_expression()
         return ast.WhileStatement(
             None if cond.location is None else cond.location.new(), cond, body)
+
+    def parse_break_statement(self) -> ast.BreakStatement:
+        statement = self.consume("break")
+        return ast.BreakStatement(statement.location)
+
+    def parse_continue_statement(self) -> ast.ContinueStatement:
+        statement = self.consume("continue")
+        return ast.ContinueStatement(statement.location)
 
     def _parse_variable_type(self) -> FunType | PrimitiveType:
         self.consume(":")
@@ -356,6 +369,6 @@ def check_is_identifier(
 
 
 if __name__ == "__main__":
-    tokens = tokenizer("var x = print_int; x(4)")
+    tokens = tokenizer("1; 2; break; continue")
     parsed = parse(tokens)
     print(parsed)

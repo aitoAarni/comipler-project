@@ -7,7 +7,7 @@ from compiler.tokenizer import Token
 
 
 def get_keywords() -> list[str]:
-    return ["if", "while", "var"]
+    return ["if", "while", "var", "break", "continue"]
 
 
 def search_last_expression_of_conditional(

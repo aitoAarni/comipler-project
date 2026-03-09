@@ -83,3 +83,11 @@ class VariableDeclaration(Expression):
     identifier: Identifier
     initializer: Expression
     var_type: PrimitiveType | FunType | None = None
+
+@dataclass
+class BreakStatement(Expression):
+    pass
+
+@dataclass
+class ContinueStatement(Expression):
+    pass

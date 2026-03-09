@@ -4,6 +4,7 @@ from compiler.types import Bool, Int, Unit
 from compiler.ir import IRVar, Label
 from compiler.utils import create_top_level_type_symbol_table
 from typing import Generator
+from compiler.location import Location
 import dataclasses
 
 # TODO add 'and' and 'or' keyowrds to work properly
@@ -14,6 +15,8 @@ class IrGenerator:
         self.reserved_names = reserved_names
         self.root_expr = root_expr
         self.root_symtab = SymTab[IRVar]()
+        self.current_loop_start: Label | None = None
+        self.current_loop_end: Label | None = None
 
     def get_locals(self) -> list[IRVar]:
         return self.root_symtab.get_locals()
@@ -220,9 +223,15 @@ class IrGenerator:
                     # return a special variable "unit".
 
                 case ast.WhileStatement():
+                    previous_start = self.current_loop_start
+                    previous_end = self.current_loop_end
                     l_while_start = label_generator.get_while_start_label(loc)
                     l_while_body = label_generator.get_while_body_label(loc)
                     l_while_end = label_generator.get_while_end_label(loc)
+
+                    self.current_loop_start = l_while_start
+                    self.current_loop_end = l_while_end
+
                     ins.append(l_while_start)
                     var_cond = visit(st, expr.cond)
                     ins.append(
@@ -235,7 +244,22 @@ class IrGenerator:
                     visit(st, expr.body)
                     ins.append(ir.Jump(loc, l_while_start))
                     ins.append(l_while_end)
+                    self.current_loop_start = previous_start
+                    self.current_loop_end = previous_end
+                    return var_unit
 
+                case ast.BreakStatement():
+                    assert isinstance(expr.location, Location)
+                    assert self.current_loop_end is not None, f"Error "
+                    f"{expr.location}: can't call break outside of loop"
+                    ins.append(ir.Jump(expr.location, self.current_loop_end))
+                    return var_unit
+
+                case ast.ContinueStatement():
+                    assert isinstance(expr.location, Location)
+                    assert self.current_loop_start is not None, f"Error "
+                    f"{expr.location}: can't call continue outside of loop"
+                    ins.append(ir.Jump(expr.location, self.current_loop_start))
                     return var_unit
 
                 case ast.FunctionCall():
@@ -244,8 +268,8 @@ class IrGenerator:
                         func_args.append(visit(st, arg))
                     return_val = next(new_var)
                     function_var = st.get_symbol(
-                                expr.function_name.name)
-                    
+                        expr.function_name.name)
+
                     ins.append(
                         ir.Call(
                             loc,
@@ -317,10 +341,7 @@ if __name__ == "__main__":
     from compiler.type_checker import typecheck
     from compiler.utils import GLOBAL_VARS
 
-    code = """
-    var x = print_int;
-    x(4)
-    """
+    code = "while true do {while true do {1; continue}}"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
@@ -328,7 +349,6 @@ if __name__ == "__main__":
     if parsed:
         ir_gen = IrGenerator(set(GLOBAL_VARS), parsed)
         intermediate_representation = ir_gen.generate_ir()
-        
+
         for command in intermediate_representation:
             print(command)
-        print("locals: ", ir_gen.get_locals())

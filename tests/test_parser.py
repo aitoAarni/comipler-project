@@ -501,7 +501,7 @@ def test_keyword_as_var_throws() -> None:
                                "=", t[3]], ["1", t[0]])
         with pytest.raises(
             Exception,
-            match=r"\(0, 0\): expected \"\(\", an integer literal or an identifier",
+            match=r"\(0, 0\): expected \"\(\", an integer literal or an identifier|Variable must be of type identifier",
         ):
             parse(tokens)
 

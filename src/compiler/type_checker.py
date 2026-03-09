@@ -127,6 +127,11 @@ def typecheck(node: ast.Expression | None,
                     f"paremater type {function.arg_types[i]}"
                     f", but got instead {arg_type}: {arg}.")
             return function.return_type
+        case ast.BreakStatement():
+            return Unit
+
+        case ast.ContinueStatement():
+            return Unit
 
         case ast.Block():
 
@@ -144,9 +149,10 @@ def typecheck(node: ast.Expression | None,
 
 
 if __name__ == "__main__":
-    code = "1+1"
+    code = "1; 2; break; continue"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
     typed = typecheck(parsed, type_table)
+    print("typed: ", typed)
     print(parsed)
