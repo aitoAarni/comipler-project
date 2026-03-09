@@ -1,4 +1,5 @@
 from compiler.types import Int, Bool, Unit, PrimitiveType, FunType
+from pprint import pprint
 from compiler.tokenizer import tokenizer
 from compiler.parser import parse
 import compiler.custom_ast as ast
@@ -7,7 +8,7 @@ from compiler.utils import create_top_level_type_symbol_table
 
 
 def typecheck_statements(node: ast.Expression | None,
-              type_table: SymTab) -> PrimitiveType | FunType:
+                         type_table: SymTab) -> PrimitiveType | FunType:
     match node:
         case ast.Literal():
             val_type = type(node.value)
@@ -139,7 +140,8 @@ def typecheck_statements(node: ast.Expression | None,
             nested_type_table = symbol_table_factory("types", type_table)
             for statement in statements:
                 typecheck_statements(statement, nested_type_table)
-            return_type = typecheck_statements(node.result_expression, nested_type_table)
+            return_type = typecheck_statements(
+                node.result_expression, nested_type_table)
 
             node.type = return_type
             return return_type
@@ -147,15 +149,31 @@ def typecheck_statements(node: ast.Expression | None,
             raise ValueError(
                 f"Error: type of {node} isn't defined in typechecker")
 
+
 def typecheck(module: ast.Module,
               type_table: SymTab) -> list[PrimitiveType | FunType]:
     return_vals: list[PrimitiveType | FunType] = []
-    for node in module.functions:
-        return_vals.append(typecheck_statements(node.body, type_table))
+    for func in module.functions:
+        if func.name != "main":
+            func_arg_types: list[PrimitiveType] = []
+            for arg in func.params:
+                func_arg_types.append(arg.type)
+            type_table.add_symbol(
+                func.name, FunType(
+                    func_arg_types, func.result_type))
+
+        return_vals.append(typecheck_statements(func.body, type_table))
+    pprint(type_table.symbols)
     return return_vals
 
+
 if __name__ == "__main__":
-    code = "1; 2; break; continue"
+    code = """
+fun square(x: Int, b: Bool): Int {
+    1+1; 2+2;
+}
+square(2, true)
+"""
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()

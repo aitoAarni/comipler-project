@@ -7,8 +7,6 @@ from typing import Generator
 from compiler.location import Location
 import dataclasses
 
-# TODO add 'and' and 'or' keyowrds to work properly
-
 
 class IrGenerator:
     def __init__(self, reserved_names: set[str], module: ast.Module):
@@ -37,28 +35,14 @@ class IrGenerator:
 
         label_generator = ir.LabelGenerator()
 
-        # We collect the IR instructions that we generate
-        # into this list.
         ins: list[ir.Instruction] = []
 
-        # This function visits an AST node,
-        # appends IR instructions to 'ins',
-        # and returns the IR variable where
-        # the emitted IR instructions put the result.
-        #
-        # It uses a symbol table to map local variables
-        # (which may be shadowed) to unique IR variables.
-        # The symbol table will be updated in the same way as
-        # in the interpreter and type checker.
         def visit(st: SymTab[IRVar], expr: ast.Expression) -> IRVar:
             loc = expr.location
             if not loc:
                 raise Exception("Location not defined")
             match expr:
                 case ast.Literal():
-                    # Create an IR variable to hold the value,
-                    # and emit the correct instruction to
-                    # load the constant value.
                     match expr.value:
                         case bool():
                             var = next(new_var)
@@ -76,13 +60,9 @@ class IrGenerator:
                                 f"{loc}: unsupported literal: "
                                 f"{type(expr.value)}")
 
-                    # Return the variable that holds
-                    # the loaded value.
                     return var
 
                 case ast.Identifier():
-                    # Look up the IR variable that corresponds to
-                    # the source code variable.
                     return st.get_symbol(expr.name)
 
                 case ast.VariableDeclaration():
@@ -105,8 +85,6 @@ class IrGenerator:
                     return var_result
 
                 case ast.BinaryOp():
-                    # Ask the symbol table to return the variable that refers
-                    # to the operator to call.
                     var_op = st.get_symbol(expr.op.symbol)
                     if expr.op.symbol == "=":
                         var_right = visit(st, expr.right)
@@ -164,13 +142,9 @@ class IrGenerator:
 
                         return result_var
                     else:
-                        # Recursively emit instructions to calculate the
-                        # operands.
                         var_left = visit(st, expr.left)
                         var_right = visit(st, expr.right)
-                        # Generate variable to hold the result.
                         var_result = next(new_var)
-                        # Emit a Call instruction that writes to that variable.
 
                         ins.append(ir.Call(
                             loc, var_op, [var_left, var_right], var_result))
@@ -185,25 +159,13 @@ class IrGenerator:
                     var_cond = visit(st, expr.cond)
 
                     if expr.else_ is None:
-                        # Create (but don't emit) some jump targets.
-
-                        # Recursively emit instructions for
-                        # evaluating the condition.
-                        # Emit a conditional jump instruction
-                        # to jump to 'l_then' or 'l_end',
-                        # depending on the content of 'var_cond'.
                         ins.append(ir.CondJump(loc, var_cond, l_then, l_end))
 
-                        # Emit the label that marks the beginning of
-                        # the "then" branch.
                         ins.append(l_then)
-                        # Recursively emit instructions for the "then" branch.
                         result = visit(st, expr.then_)
 
                         ins.append(l_end)
                         return result
-                        # Emit the label that we jump to
-                        # when we don't want to go to the "then" branch.
                     else:
                         assert l_else is not None
                         result = next(new_var)
@@ -219,8 +181,6 @@ class IrGenerator:
                         ins.append(l_end)
                         return result
 
-                    # An if-then expression doesn't return anything, so we
-                    # return a special variable "unit".
 
                 case ast.WhileStatement():
                     previous_start = self.current_loop_start
