@@ -1,5 +1,4 @@
 from compiler.types import Int, Bool, Unit, PrimitiveType, FunType
-from pprint import pprint
 from compiler.tokenizer import tokenizer
 from compiler.parser import parse
 import compiler.custom_ast as ast
@@ -158,19 +157,20 @@ def typecheck(module: ast.Module,
             func_arg_types: list[PrimitiveType] = []
             for arg in func.params:
                 func_arg_types.append(arg.type)
+                type_table.add_symbol(arg.name, arg.type)
+
             type_table.add_symbol(
                 func.name, FunType(
                     func_arg_types, func.result_type))
 
         return_vals.append(typecheck_statements(func.body, type_table))
-    pprint(type_table.symbols)
     return return_vals
 
 
 if __name__ == "__main__":
     code = """
 fun square(x: Int, b: Bool): Int {
-    1+1; 2+2;
+    x; 1+1; 2+2;
 }
 square(2, true)
 """

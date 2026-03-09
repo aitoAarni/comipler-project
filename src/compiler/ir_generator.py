@@ -9,7 +9,7 @@ import dataclasses
 
 
 class IrGenerator:
-    def __init__(self, reserved_names: set[str], module: ast.Module):
+    def __init__(self, reserved_names: list[str], module: ast.Module):
         self.reserved_names = reserved_names
         self.module = module
         self.root_symtab = SymTab[IRVar]()
@@ -181,7 +181,6 @@ class IrGenerator:
                         ins.append(l_end)
                         return result
 
-
                 case ast.WhileStatement():
                     previous_start = self.current_loop_start
                     previous_end = self.current_loop_end
@@ -248,12 +247,13 @@ class IrGenerator:
                     return var_unit
                 case _:
                     raise ValueError("Not implemented")
-
-        for name in self.reserved_names:
+        user_def_func_names = [
+            func.name for func in self.module.functions if func.name != "main"]
+        for name in self.reserved_names + user_def_func_names:
             self.root_symtab.add_symbol(name, IRVar(name))
+
         root_expr = self.module.functions[0].body
         var_final_result = visit(self.root_symtab, root_expr)
-
         if root_expr == Int:
             r_val = next(new_var)
             ins.append(
@@ -270,7 +270,7 @@ class IrGenerator:
                     ins[0].location,
                     self.root_symtab.get_symbol("print_bool"),
                     [var_final_result],
-                 r_val))
+                    r_val))
         return_var = {"main": ins}
         return return_var
 
@@ -302,13 +302,19 @@ if __name__ == "__main__":
     from compiler.type_checker import typecheck
     from compiler.utils import GLOBAL_VARS
 
-    code = "while true do {while true do {1; continue}}"
+    code = """
+fun square(x: Int, b: Bool): Int {
+    1+1; 2+2;
+}
+square(2, true)
+"""
+
     tokens = tokenizer(code)
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
     typecheck(parsed, type_table)
     if parsed:
-        ir_gen = IrGenerator(set(GLOBAL_VARS), parsed)
+        ir_gen = IrGenerator(GLOBAL_VARS, parsed)
         intermediate_representation = ir_gen.generate_ir()
 
         for command in intermediate_representation:
