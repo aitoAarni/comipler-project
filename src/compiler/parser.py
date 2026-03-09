@@ -217,7 +217,6 @@ class Parser:
                 f"Keyowrd "
                 f"{self.peek().text} is not handled in parser")
 
-
     def parse_if_statement(self) -> ast.TernaryOp:
         self.consume("if")
         if_ = self.parse_expression()
@@ -340,9 +339,9 @@ class Parser:
         return None if result_expression.location is None else result_expression.location.new(
         ), statements, result_expression
 
-    def parse(self) -> ast.Expression | None:
+    def parse(self) -> ast.Module:
         if not bool(self.tokens):
-            return None
+            return ast.Module([])
         expression = self.parse_top_level()
         if self.pos != self.token_length:
             loc = self.peek().location
@@ -351,10 +350,10 @@ class Parser:
                     loc.line}, {
                     loc.column}), token: {
                     self.peek().text}")
-        return expression
+        return ast.Module([ast.FunctionDefinition(expression)])
 
 
-def parse(tokens: list[Token]) -> ast.Expression | None:
+def parse(tokens: list[Token]) -> ast.Module:
     parser = Parser(tokens)
     return parser.parse()
 

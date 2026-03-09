@@ -66,11 +66,15 @@ def interpret(node: ast.Expression | None, symbol_table: SymTab) -> Value:
     return None
 
 
+def call_interpreter(nodes: ast.Module, symbol_table: SymTab) -> None:
+    for node in nodes.functions:
+        interpret(node.body, symbol_table)
+    
+
 if __name__ == "__main__":
 
     code = "if 0 then 2+2 else 5 *2"
     tokens = tokenizer(code)
     parsed = parse(tokens)
     symbol_table = create_top_level_variable_symbol_table()
-    interpreted = interpret(parsed, symbol_table)
-    print(f"interpreted value: {interpreted}")
+    call_interpreter(parsed, symbol_table)

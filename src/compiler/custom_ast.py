@@ -2,10 +2,15 @@ from dataclasses import dataclass, field
 from compiler.location import Location
 from compiler.types import FunType, PrimitiveType, Unit, Type
 
+@dataclass
+class Expression:
+    """Base class for AST nodes representing expressions."""
+    location: Location | None
+    type: Type = field(kw_only=True, default_factory=lambda: Unit)
 
 @dataclass
 class FunctionDefinition:
-    pass
+    body: Expression
 
 
 @dataclass
@@ -14,11 +19,6 @@ class Module:
     functions: list[FunctionDefinition]
 
 
-@dataclass
-class Expression:
-    """Base class for AST nodes representing expressions."""
-    location: Location | None
-    type: Type = field(kw_only=True, default_factory=lambda: Unit)
 
 
 @dataclass

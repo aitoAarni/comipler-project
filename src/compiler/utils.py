@@ -114,4 +114,3 @@ if __name__ == "__main__":
     parsed = parse(tokenizer(tokens))
     print(parsed)
 
-    print(expression_ends_with_block(parsed))

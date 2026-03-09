@@ -6,7 +6,7 @@ from compiler.symbol_table import SymTab, symbol_table_factory
 from compiler.utils import create_top_level_type_symbol_table
 
 
-def typecheck(node: ast.Expression | None,
+def typecheck_statements(node: ast.Expression | None,
               type_table: SymTab) -> PrimitiveType | FunType:
     match node:
         case ast.Literal():
@@ -28,7 +28,7 @@ def typecheck(node: ast.Expression | None,
 
         case ast.VariableDeclaration():
             variable = node.identifier.name
-            value = typecheck(node.initializer, type_table)
+            value = typecheck_statements(node.initializer, type_table)
             node.type = Unit
             if node.var_type is not None:
                 if not value == node.var_type:
@@ -41,7 +41,7 @@ def typecheck(node: ast.Expression | None,
             type_table.add_symbol(variable, value)
             return Unit
         case ast.UnaryOp():
-            operand = typecheck(node.right, type_table)
+            operand = typecheck_statements(node.right, type_table)
             node.type = operand
             function = type_table.get_symbol("unary_" + node.op.symbol)
             if operand != function.arg_types[0]:
@@ -52,9 +52,9 @@ def typecheck(node: ast.Expression | None,
             return function.return_type
 
         case ast.BinaryOp():
-            t1 = typecheck(node.left, type_table)
+            t1 = typecheck_statements(node.left, type_table)
 
-            t2 = typecheck(node.right, type_table)
+            t2 = typecheck_statements(node.right, type_table)
 
             if node.op.symbol in ["=", "==", "!="]:
                 if t1 != t2:
@@ -80,14 +80,14 @@ def typecheck(node: ast.Expression | None,
                 return function.return_type
 
         case ast.TernaryOp():
-            t1 = typecheck(node.cond, type_table)
+            t1 = typecheck_statements(node.cond, type_table)
             if t1 is not Bool:
                 raise Exception(f"Error: condition {node.cond} is not {Bool}")
-            t2 = typecheck(node.then_, type_table)
+            t2 = typecheck_statements(node.then_, type_table)
             node.type = Unit
 
             if node.else_ is not None:
-                t3 = typecheck(node.else_, type_table)
+                t3 = typecheck_statements(node.else_, type_table)
 
             if node.else_ is None:
                 return t2
@@ -101,10 +101,10 @@ def typecheck(node: ast.Expression | None,
             return t2
 
         case ast.WhileStatement():
-            t1 = typecheck(node.cond, type_table)
+            t1 = typecheck_statements(node.cond, type_table)
             if t1 is not Bool:
                 raise Exception(f"Error: condition {node.cond} is not {Bool}")
-            t2 = typecheck(node.body, type_table)
+            t2 = typecheck_statements(node.body, type_table)
             node.type = t2
             return t2
 
@@ -118,7 +118,7 @@ def typecheck(node: ast.Expression | None,
                     f"{len(function.arg_types)} argument(s), but {len(args)} were given."
                 )
             for i, arg in enumerate(args):
-                arg_type = typecheck(arg, type_table)
+                arg_type = typecheck_statements(arg, type_table)
                 if function.arg_types[i] == arg_type:
                     continue
                 raise Exception(
@@ -138,8 +138,8 @@ def typecheck(node: ast.Expression | None,
             statements = node.statements
             nested_type_table = symbol_table_factory("types", type_table)
             for statement in statements:
-                typecheck(statement, nested_type_table)
-            return_type = typecheck(node.result_expression, nested_type_table)
+                typecheck_statements(statement, nested_type_table)
+            return_type = typecheck_statements(node.result_expression, nested_type_table)
 
             node.type = return_type
             return return_type
@@ -147,6 +147,12 @@ def typecheck(node: ast.Expression | None,
             raise ValueError(
                 f"Error: type of {node} isn't defined in typechecker")
 
+def typecheck(module: ast.Module,
+              type_table: SymTab) -> list[PrimitiveType | FunType]:
+    return_vals: list[PrimitiveType | FunType] = []
+    for node in module.functions:
+        return_vals.append(typecheck_statements(node.body, type_table))
+    return return_vals
 
 if __name__ == "__main__":
     code = "1; 2; break; continue"
@@ -154,5 +160,4 @@ if __name__ == "__main__":
     parsed = parse(tokens)
     type_table = create_top_level_type_symbol_table()
     typed = typecheck(parsed, type_table)
-    print("typed: ", typed)
     print(parsed)

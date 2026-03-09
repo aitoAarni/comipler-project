@@ -82,7 +82,7 @@ def test_parse_plus_operation() -> None:
 
     print(tokens)
     parsed = parse(tokens)
-    assert parsed == expression
+    assert parsed.functions[0].body == expression
 
 
 def test_operators_work_with_variables() -> None:
@@ -91,7 +91,7 @@ def test_operators_work_with_variables() -> None:
     tokens = create_tokens(["a", t[1]], ["+", t[3]], ["a", t[1]])
     parsed = parse(tokens)
 
-    assert parsed == correct_expression
+    assert parsed.functions[0].body == correct_expression
 
 
 def test_wrong_syntax_throws_error() -> None:
@@ -111,7 +111,7 @@ def test_parse_term() -> None:
         a, Operator("+"), BinaryOp(a, Operator("*"), Literal(2))
     )
     parsed = parse(tokens)
-    assert parsed == correct_expresion
+    assert parsed.functions[0].body == correct_expresion
 
 
 def test_parse_with_parenthesis() -> None:
@@ -129,12 +129,12 @@ def test_parse_with_parenthesis() -> None:
         BinaryOp(a, Operator("+"), a), Operator("*"), Literal(2)
     )
     parsed = parse(tokens)
-    assert parsed == correct_expresion
+    assert parsed.functions[0].body == correct_expresion
 
 
 def test_empty_input_on_parser() -> None:
     parsed = parse([])
-    assert parsed is None
+    assert parsed.functions == []
 
 
 def test_invalid_operation() -> None:
@@ -152,7 +152,7 @@ def test_ternary_operator() -> None:
     right_answer = TernaryOp(two, three, None)
     tokens = create_tokens(["if", t[1]], [2, t[0]], ["then", t[1]], [3, t[0]])
     parsed = parse(tokens)
-    assert parsed == right_answer
+    assert parsed.functions[0].body == right_answer
 
 
 def test_ternary_operator_with_else() -> None:
@@ -166,7 +166,7 @@ def test_ternary_operator_with_else() -> None:
             2, t[0]], ["else", t[1]], [3, t[0]]
     )
     parsed = parse(tokens)
-    assert parsed == right_answer
+    assert parsed.functions[0].body == right_answer
 
 
 def test_ternary_operator_expressions() -> None:
@@ -191,7 +191,7 @@ def test_ternary_operator_expressions() -> None:
         ["b", t[1]],
     )
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_nexted_if_statement() -> None:
@@ -211,14 +211,14 @@ def test_nexted_if_statement() -> None:
         [1, t[0]],
     )
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_function_call() -> None:
     correct_answer = FunctionCall(Identifier("f"), [Literal(1)])
     tokens = create_tokens(["f", t[1]], ["(", t[2]], [1, t[0]], [")", t[2]])
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_function_call_multiple_args() -> None:
@@ -241,7 +241,7 @@ def test_function_call_multiple_args() -> None:
         [")", t[2]],
     )
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_invalid_function_syntax() -> None:
@@ -264,63 +264,63 @@ def test_remainder_operator() -> None:
 
     tokens = create_tokens(["1", t[0]], ["%", t[3]], ["a", t[1]])
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_equal_operator() -> None:
     correct_answer = BinaryOp(Literal(1), Operator("=="), Literal(1))
     tokens = create_tokens(["1", t[0]], ["==", t[3]], [1, t[0]])
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_not_equal_operator() -> None:
     correct_answer = BinaryOp(Literal(1), Operator("!="), Literal(1))
     tokens = create_tokens(["1", t[0]], ["!=", t[3]], [1, t[0]])
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_less_than_operator() -> None:
     correct_answer = BinaryOp(Literal(1), Operator("<"), Literal(1))
     tokens = create_tokens(["1", t[0]], ["<", t[3]], [1, t[0]])
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_less_than_or_equal_operator() -> None:
     correct_answer = BinaryOp(Literal(1), Operator("<="), Literal(1))
     tokens = create_tokens(["1", t[0]], ["<=", t[3]], [1, t[0]])
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_greater_than_operator() -> None:
     correct_answer = BinaryOp(Literal(1), Operator(">"), Literal(1))
     tokens = create_tokens(["1", t[0]], [">", t[3]], [1, t[0]])
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_greater_than_or_equal_operator() -> None:
     correct_answer = BinaryOp(Literal(1), Operator(">="), Literal(1))
     tokens = create_tokens(["1", t[0]], [">=", t[3]], [1, t[0]])
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_and_operator() -> None:
     correct_answer = BinaryOp(Literal(1), Operator("and"), Literal(1))
     tokens = create_tokens(["1", t[0]], ["and", t[3]], [1, t[0]])
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_or_operator() -> None:
     correct_answer = BinaryOp(Literal(1), Operator("or"), Literal(1))
     tokens = create_tokens(["1", t[0]], ["or", t[3]], [1, t[0]])
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_not_operator() -> None:
@@ -328,14 +328,14 @@ def test_not_operator() -> None:
         Operator("not"), UnaryOp(Operator("not"), Literal(1)))
     tokens = create_tokens(["not", t[3]], ["not", t[3]], [1, t[0]])
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_unary_minus_operator() -> None:
     correct_answer = UnaryOp(Operator("-"), UnaryOp(Operator("-"), Literal(1)))
     tokens = create_tokens(["-", t[3]], ["-", t[3]], [1, t[0]])
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_ast_structure() -> None:
@@ -354,7 +354,7 @@ def test_ast_structure() -> None:
         ["d", t[1]],
     )
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_assignment_operator() -> None:
@@ -367,7 +367,7 @@ def test_assignment_operator() -> None:
         ["a", t[1]], ["=", t[3]], ["b", t[1]], ["=", t[3]], ["c", t[1]]
     )
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_assignment_only_to_identifier() -> None:
@@ -393,14 +393,14 @@ def test_while_do_statment() -> None:
     )
 
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_parse_simple_block() -> None:
     correct_answer = Block([Identifier("a")], Literal(None))
     tokens = create_tokens(["{", t[2]], ["a", t[1]], [";", t[2]], ["}", t[2]])
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_parse_multiple_expressions_block() -> None:
@@ -421,7 +421,7 @@ def test_parse_multiple_expressions_block() -> None:
         ["}", t[2]],
     )
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_parse_block_with_result_expression_block() -> None:
@@ -441,7 +441,7 @@ def test_parse_block_with_result_expression_block() -> None:
         ["}", t[2]],
     )
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_block_works_with_assignment() -> None:
@@ -468,7 +468,7 @@ def test_block_works_with_assignment() -> None:
         ["}", t[2]],
     )
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_block_where_missin_semicolon() -> None:
@@ -490,7 +490,7 @@ def test_parse_var() -> None:
     correct_answer = VariableDeclaration(Identifier("x"), Literal(1))
     tokens = create_tokens(["var", t[1]], ["x", t[1]], ["=", t[3]], ["1", t[0]])
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_keyword_as_var_throws() -> None:
@@ -532,7 +532,7 @@ def test_declare_var_inside_block() -> None:
         ["}", t[2]],
     )
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_allow_var_declaration_in_block_or_top_level() -> None:
@@ -559,7 +559,7 @@ def test_code_block_without_semicolon() -> None:
                            Block([], Identifier("b")))
     tokens = tokenizer("{ { a } { b } }")
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_nested_blocks() -> None:
@@ -569,7 +569,7 @@ def test_nested_blocks() -> None:
     )
     tokens = tokenizer("{ { a } { b }; }")
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_nested_blocks_with_ternary_operator() -> None:
@@ -585,7 +585,7 @@ def test_nested_blocks_with_ternary_operator() -> None:
     )
     tokens = tokenizer("{ if true then { a } else { b } c }")
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_missing_semicolons_in_blocks_throws() -> None:
@@ -601,7 +601,7 @@ def test_block_assignment() -> None:
     )
     tokens = tokenizer("{a = {a} b}")
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 
 def test_multiple_top_level_expressions() -> None:
@@ -609,13 +609,13 @@ def test_multiple_top_level_expressions() -> None:
         [Identifier("a"), Block([Identifier("b")])], Identifier("c"))
     tokens = tokenizer("a; {b;}; c")
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 def test_variable_type_declaration() -> None:
     correct_answer = VariableDeclaration(Identifier("x"), Literal(4), Int)
     tokens = tokenizer("var x : Int  = 4")
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer
 
 def test_too_many_variable_types_in_declaration_throws() -> None:
     tokens = tokenizer("var x : Bool Bool  = true")
@@ -626,4 +626,4 @@ def test_variable_function_type_declaration() -> None:
     correct_answer = VariableDeclaration(Identifier("x"), Identifier("print_bool"), FunType([Bool], Unit))
     tokens = tokenizer("var x : (Bool) => Unit  = print_bool")
     parsed = parse(tokens)
-    assert parsed == correct_answer
+    assert parsed.functions[0].body == correct_answer

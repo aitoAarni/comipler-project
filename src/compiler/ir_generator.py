@@ -11,9 +11,9 @@ import dataclasses
 
 
 class IrGenerator:
-    def __init__(self, reserved_names: set[str], root_expr: ast.Expression):
+    def __init__(self, reserved_names: set[str], module: ast.Module):
         self.reserved_names = reserved_names
-        self.root_expr = root_expr
+        self.module = module
         self.root_symtab = SymTab[IRVar]()
         self.current_loop_start: Label | None = None
         self.current_loop_end: Label | None = None
@@ -21,7 +21,7 @@ class IrGenerator:
     def get_locals(self) -> list[IRVar]:
         return self.root_symtab.get_locals()
 
-    def generate_ir(self) -> list[ir.Instruction]:
+    def generate_ir(self) -> dict[str, list[ir.Instruction]]:
         var_unit = IRVar('unit')
 
         def new_var_generator() -> Generator[IRVar, None, None]:
@@ -291,9 +291,10 @@ class IrGenerator:
 
         for name in self.reserved_names:
             self.root_symtab.add_symbol(name, IRVar(name))
+        root_expr = self.module.functions[0].body
+        var_final_result = visit(self.root_symtab, root_expr)
 
-        var_final_result = visit(self.root_symtab, self.root_expr)
-        if self.root_expr.type == Int:
+        if root_expr == Int:
             r_val = next(new_var)
             ins.append(
                 ir.Call(
@@ -302,16 +303,16 @@ class IrGenerator:
                     [var_final_result],
                     r_val))
 
-        elif self.root_expr.type == Bool:
+        elif root_expr == Bool:
             r_val = next(new_var)
             ins.append(
                 ir.Call(
                     ins[0].location,
                     self.root_symtab.get_symbol("print_bool"),
                     [var_final_result],
-                    r_val))
-
-        return ins
+                 r_val))
+        return_var = {"main": ins}
+        return return_var
 
 
 def get_all_ir_variables(instructions: list[ir.Instruction]) -> list[ir.IRVar]:

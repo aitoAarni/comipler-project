@@ -30,13 +30,14 @@ class Locals:
 
 
 def generate_assembly(
-        instructions: list[ir.Instruction], local_vars: list[ir.IRVar]) -> str:
+        instruction_dict: dict[str, list[ir.Instruction]], local_vars: list[ir.IRVar]) -> str:
     lines: list[str] = []
     def emit(line: str) -> None: lines.append(line)
 
     locals = Locals(
         local_vars
     )
+    instructions = instruction_dict["main"]
     call_regs = "rdi rsi rdx rcx r8 r9".split()
 
     # ... Emit initial declarations and stack setup here ...
