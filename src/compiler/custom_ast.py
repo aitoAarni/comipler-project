@@ -3,6 +3,16 @@ from compiler.location import Location
 from compiler.types import FunType, PrimitiveType, Unit, Type
 
 
+@dataclass
+class FunctionDefinition:
+    pass
+
+
+@dataclass
+class Module:
+    """The Big Jefe of AST nodes"""
+    functions: list[FunctionDefinition]
+
 
 @dataclass
 class Expression:
@@ -84,9 +94,11 @@ class VariableDeclaration(Expression):
     initializer: Expression
     var_type: PrimitiveType | FunType | None = None
 
+
 @dataclass
 class BreakStatement(Expression):
     pass
+
 
 @dataclass
 class ContinueStatement(Expression):
