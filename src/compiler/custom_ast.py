@@ -9,10 +9,17 @@ class Expression:
     type: Type = field(kw_only=True, default_factory=lambda: Unit)
 
 @dataclass
+class FunDefArg:
+    name: str
+    type: PrimitiveType
+
+
+@dataclass
 class FunctionDefinition:
     name: str
     body: Expression
-    type: FunType
+    params: list[FunDefArg]
+    result_type: PrimitiveType 
 
 
 @dataclass

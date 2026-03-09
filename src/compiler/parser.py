@@ -90,9 +90,10 @@ class Parser:
     def parse_top_level(self) -> ast.Expression | ast.Block:
         statements = []
         result_expression: ast.Expression = ast.Literal(Loc(), None)
-        while self.peek().type != "end":
+        while self.peek().type != "end" and not (self.peek().text == "fun"):
             expression = self.parse_expression(True)
-            if self.peek().type == "end":
+
+            if self.peek().type == "end" and not (self.peek().text == "fun"):
                 result_expression = expression
                 break
             statements.append(expression)
@@ -339,22 +340,46 @@ class Parser:
         return None if result_expression.location is None else result_expression.location.new(
         ), statements, result_expression
 
+    def parse_func_definition(self) -> ast.FunctionDefinition:
+        self.consume("fun")
+        func_name_token = self.consume()
+        assert func_name_token.type == "identifier"
+        func_name = func_name_token.text
+        self.consume("(")
+        func_params: list[ast.FunDefArg] = []
+        while self.peek().text != ")":
+            if func_params:
+                self.consume(",")
+            arg_name_token = self.consume()
+            assert arg_name_token.type == "identifier"
+            self.consume(":")
+            arg_type_token = self.consume(["Int", "Bool", "Unit"])
+            arg_type = convert_token_to_type(arg_type_token)
+            func_params.append(ast.FunDefArg(arg_name_token.text, arg_type))
+
+        self.consume(")")
+        self.consume(":")
+        result_type = convert_token_to_type(
+            self.consume(["Int", "Bool", "Unit"]))
+        func_body = self.parse_block()
+        return ast.FunctionDefinition(
+            func_name, func_body, func_params, result_type)
+
     def parse(self) -> ast.Module:
         if not bool(self.tokens):
             return ast.Module([])
         main_parsed = False
         functions: list[ast.FunctionDefinition] = []
         while self.pos != self.token_length:
-            if self.peek() == "fun":
-                # TODO parse func
-                pass
+            if self.peek().text == "fun":
+                function = self.parse_func_definition()
+                functions.append(function)
             elif not main_parsed:
                 expression = self.parse_top_level()
                 main_parsed = True
                 functions.append(
                     ast.FunctionDefinition(
-                        "main", expression, FunType(
-                            [], Unit)))
+                        "main", expression, [], Unit))
             else:
                 loc = self.peek().location
                 raise Exception(
@@ -379,6 +404,11 @@ def check_is_identifier(
 
 
 if __name__ == "__main__":
-    tokens = tokenizer("1+2; 3")
+    tokens = tokenizer("""
+1+1;
+fun square(x: Int, b: Bool, c: Unit): Int {
+    1+1; 2+2;
+}
+""")
     parsed = parse(tokens)
     print(parsed)
