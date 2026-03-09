@@ -10,7 +10,9 @@ class Expression:
 
 @dataclass
 class FunctionDefinition:
+    name: str
     body: Expression
+    type: FunType
 
 
 @dataclass

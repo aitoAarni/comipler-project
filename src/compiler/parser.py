@@ -9,7 +9,7 @@ from compiler.utils import (
     convert_boolean_literal,
     convert_token_to_type
 )
-from compiler.types import PrimitiveType, FunType
+from compiler.types import PrimitiveType, FunType, Unit
 
 
 class Parser:
@@ -342,15 +342,26 @@ class Parser:
     def parse(self) -> ast.Module:
         if not bool(self.tokens):
             return ast.Module([])
-        expression = self.parse_top_level()
-        if self.pos != self.token_length:
-            loc = self.peek().location
-            raise Exception(
-                f"Invalid syntax at ({
-                    loc.line}, {
-                    loc.column}), token: {
-                    self.peek().text}")
-        return ast.Module([ast.FunctionDefinition(expression)])
+        main_parsed = False
+        functions: list[ast.FunctionDefinition] = []
+        while self.pos != self.token_length:
+            if self.peek() == "fun":
+                # TODO parse func
+                pass
+            elif not main_parsed:
+                expression = self.parse_top_level()
+                main_parsed = True
+                functions.append(
+                    ast.FunctionDefinition(
+                        "main", expression, FunType(
+                            [], Unit)))
+            else:
+                loc = self.peek().location
+                raise Exception(
+                    f"Invalid syntax at "
+                    f"({loc.line}, {loc.column})"
+                    f", token: {self.peek().text}")
+        return ast.Module(functions)
 
 
 def parse(tokens: list[Token]) -> ast.Module:
@@ -368,6 +379,6 @@ def check_is_identifier(
 
 
 if __name__ == "__main__":
-    tokens = tokenizer("1; 2; break; continue")
+    tokens = tokenizer("1+2; 3")
     parsed = parse(tokens)
     print(parsed)
