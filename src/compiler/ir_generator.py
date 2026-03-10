@@ -35,7 +35,7 @@ class IrGenerator:
                 locals = []
             assert locals is not None
             while True:
-                var_name = "x" + str(num) if num != 1 else "x"
+                var_name = str(num) + "x"
                 ir_var = IRVar(var_name)
                 locals.append(ir_var)
                 yield ir_var
