@@ -112,7 +112,7 @@ def typecheck_statements(node: ast.Expression | None,
             args = node.args
             function = type_table.get_symbol(node.function_name.name)
             node.type = function.return_type
-            if len(args) > len(function.arg_types):
+            if len(args) != len(function.arg_types):
                 raise Exception(
                     f"Error: function {node.function_name.name} takes "
                     f"{len(function.arg_types)} argument(s), but {len(args)} were given."
@@ -160,28 +160,40 @@ def typecheck_statements(node: ast.Expression | None,
 def typecheck(module: ast.Module,
               type_table: SymTab) -> list[PrimitiveType | FunType]:
     return_vals: list[PrimitiveType | FunType] = []
+
     for func in module.functions:
+
         func_arg_types: list[PrimitiveType] = []
         for arg in func.params:
             func_arg_types.append(arg.type)
-            type_table.add_symbol(arg.name, arg.type)
-
         type_table.add_symbol(
             func.name, FunType(
                 func_arg_types, func.result_type))
 
-        return_vals.append(typecheck_statements(func.body, type_table))
+    for func in module.functions:
+        func_type_table = SymTab[PrimitiveType](type_table)
+        for arg in func.params:
+            func_type_table.add_symbol(arg.name, arg.type)
+
+        st = type_table if func.name == "main" else func_type_table
+        return_vals.append(typecheck_statements(func.body, st))
     return return_vals
 
 
 if __name__ == "__main__":
     code = """
-fun square(): Int {
-    var x = 3;
-    return 1;
+fun f(x: Int): Int {
+    return g(x + 1);
 }
-var x = 4;
-square()
+fun g(x: Int): Int {
+    print_int(x);
+    if x < 5 then {
+        return f(x);
+    } else {
+        return x;
+    }
+}
+f(1) * 100
 """
     tokens = tokenizer(code)
     parsed = parse(tokens)

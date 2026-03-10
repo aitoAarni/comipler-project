@@ -1,5 +1,11 @@
-fun square(x: Int): Int {
-    return x * x;
+fun factorial(x: Int): Int {
+    var result = 0;
+    if x > 1 then {
+        result = x * factorial(x - 1);
+    } else {
+        result = 1;
+    }
+    return result;
 }
 
-square(3)
+factorial(5)

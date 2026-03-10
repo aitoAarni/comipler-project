@@ -1,10 +1,10 @@
 from __future__ import annotations
-from compiler.types import FunType
+from compiler.types import FunType, PrimitiveType
 from collections.abc import Callable
 from typing import Any, Literal, overload
 from compiler.ir import IRVar
 
-type SymTabReturnType = FunType | Callable[..., Any] | IRVar
+type SymTabReturnType = FunType | Callable[..., Any] | IRVar | PrimitiveType
 
 
 class SymTab[T: SymTabReturnType]:
