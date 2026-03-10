@@ -2,6 +2,7 @@ import compiler.ir as ir
 
 # TODO createa new Class to ir: FuncDef, where args are passe
 
+
 class Locals:
     """Knows the memory location of every local variable."""
     _var_to_location: dict[ir.IRVar, str]
@@ -50,15 +51,17 @@ def get_assembly(instruction_dict: dict[str,
     emit(".extern print_int")
     emit(".extern print_bool")
     emit(".extern read_int")
-    emit(".global main")
-    emit(".type main, @function")
     emit(".section .text")
     emit("")
 
     for key, instructions in instruction_dict.items():
 
         locals = local_vars[key]
-        assembly_code.append(generate_func_assembly(instructions, locals, functions))
+        assembly_code.append(
+            generate_func_assembly(
+                instructions,
+                locals,
+                functions))
 
     return "\n".join(assembly_code)
 
@@ -66,7 +69,9 @@ def get_assembly(instruction_dict: dict[str,
 def generate_func_assembly(
         instructions: list[ir.Instruction], local_vars: list[ir.IRVar], functions: list[ir.IRVar]) -> str:
     lines: list[str] = []
-    def emit(line: str, tabs: bool = True) -> None: lines.append("  " + line if tabs else line)
+
+    def emit(line: str, tabs: bool = True) -> None: lines.append("  " +
+                                                                 line if tabs else line)
 
     locals = Locals(
         local_vars,
@@ -86,6 +91,9 @@ def generate_func_assembly(
                 emit(f'.L{insn.name}:')
                 continue
             case ir.FunctionDefinition():
+                emit(f".global {insn.name}", False)
+                emit(f".type {insn.name}, @function", False)
+                emit("", False)
                 emit(f"{insn.name}:", False)
                 for param in locals._var_to_location:
                     emit(f"  # {param} in {locals.get_ref(param)}")
@@ -123,6 +131,12 @@ def generate_func_assembly(
             case ir.Jump():
                 emit(f'jmp .L{insn.label.name}')
                 continue
+            case ir.Return():
+                emit(f"movq {locals.get_ref(insn.return_val)}, %rax")
+                emit(f"movq %rbp, %rsp")
+                emit(f"popq %rbp")
+                emit(f"ret")
+
             case ir.Call():
                 args = [locals.get_ref(arg) for arg in insn.args]
                 result = locals.get_ref(insn.dest)
@@ -237,11 +251,11 @@ if __name__ == "__main__":
     from compiler.utils import create_top_level_type_symbol_table
 
     code = """
-    fun square(a: Int, b: Int): Int {
-    a+b;
+        fun square(): Int {
+    return 3;
     }
-    square(2, 3);
-    var a = 2
+1;
+    square();
     """
     tokens = tokenizer(code)
     parsed = parse(tokens)

@@ -201,8 +201,9 @@ class Parser:
                 f'{self.peek().location}: expected "(", an integer literal or an identifier'
             )
 
-    def parse_keyword(
-            self) -> ast.TernaryOp | ast.WhileStatement | ast.VariableDeclaration | ast.ContinueStatement | ast.BreakStatement:
+    def parse_keyword(self) -> (ast.TernaryOp | ast.WhileStatement |
+                                ast.VariableDeclaration | ast.ContinueStatement |
+                                ast.BreakStatement | ast.ReturnStatement):
         if self.peek().text == "if":
             parse
             return self.parse_if_statement()

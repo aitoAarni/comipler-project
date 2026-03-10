@@ -38,10 +38,10 @@ class FunctionDefinition(Instruction):
     name: IRVar
     params: list[IRVar]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.name}({", ".join([param.name for param in self.params])})"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.name}({", ".join([param.name for param in self.params])})"
 
 @dataclass(frozen=True)

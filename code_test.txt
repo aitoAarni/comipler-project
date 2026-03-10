@@ -1,10 +1,5 @@
-var n = read_int();
-print_int(n);
-while n > 1 do {
-    if n % 2 == 0 then {
-        n = n / 2;
-    } else {
-        n = 3 * n + 1;
-    }
-    print_int(n);
+fun square(x: Int): Int {
+    return x * x;
 }
+
+square(3)

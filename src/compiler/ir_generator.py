@@ -49,8 +49,9 @@ class IrGenerator:
         def visit(st: SymTab[IRVar], expr: ast.Expression |
                   ast.FunctionDefinition) -> IRVar:
             assert not isinstance(new_var, type(None))
-            loc: Location | None = expr.location if isinstance(
-                expr, ast.Expression) else None
+            loc = expr.location if isinstance(
+                expr, ast.Expression) else Location()
+            assert isinstance(loc, Location)
             match expr:
                 case ast.Literal():
                     match expr.value:
@@ -250,6 +251,7 @@ class IrGenerator:
                 case ast.ReturnStatement():
                     return_val = visit(st, expr.return_val)
                     ins.append(ir.Return(loc, return_val))
+                    return return_val
 
                 case ast.Block():
                     block_symbol_table = SymTab[IRVar](st)
@@ -259,9 +261,9 @@ class IrGenerator:
 
                 case ast.FunctionDefinition():
                     params = [IRVar(param.name) for param in expr.params]
-                    ins.append(ir.FunctionDefinition(loc, expr.name, params))
-                    visit(st, expr.body)
-                    return var_unit
+                    ins.append(ir.FunctionDefinition(loc, IRVar(expr.name), params))
+                    return_var = visit(st, expr.body)
+                    return return_var
                 case None:
                     return var_unit
                 case _:
@@ -296,7 +298,8 @@ class IrGenerator:
         new_var = new_var_generator(self.func_locals["main"])
         root_expr = self.module.functions[-1]
         var_final_result = visit(self.root_symtab, root_expr)
-        if root_expr.body == Int:
+        print("root_expr", self.module.functions[-1])
+        if root_expr.body.type == Int:
             r_val = next(new_var)
             ins.append(
                 ir.Call(
@@ -305,7 +308,7 @@ class IrGenerator:
                     [var_final_result],
                     r_val))
 
-        elif root_expr.body == Bool:
+        elif root_expr.body.type == Bool:
             r_val = next(new_var)
             ins.append(
                 ir.Call(
@@ -324,11 +327,11 @@ if __name__ == "__main__":
     from compiler.utils import GLOBAL_VARS
 
     code = """
-       fun square(): Int {
-    var x = 3;
-    return 3 - x;
-    }
-    square();
+           fun square(x: Int): Int {
+    return x * x;
+}
+
+square(3)
     """
 
     tokens = tokenizer(code)

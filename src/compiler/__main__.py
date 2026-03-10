@@ -12,7 +12,7 @@ from compiler.type_checker import typecheck
 from compiler.utils import GLOBAL_VARS
 from compiler.ir_generator import IrGenerator
 from compiler.utils import create_top_level_type_symbol_table
-from compiler.assembly_generator import generate_assembly
+from compiler.assembly_generator import get_assembly
 from compiler.assembler import assemble_and_get_executable
 
 
@@ -25,14 +25,14 @@ def call_compiler(source_code: str) -> bytes:
     print(parsed)
     print()
     assert parsed is not None
-    ir_gen = IrGenerator(set(GLOBAL_VARS), parsed)
-
+    ir_gen = IrGenerator(GLOBAL_VARS, parsed)
     intermediate_representation = ir_gen.generate_ir()
-    for i in intermediate_representation:
-        print(i)
-    assembly_code = generate_assembly(
+    assembly_code = get_assembly(
         intermediate_representation,
-        ir_gen.get_locals())
+            ir_gen.get_locals(),
+            ir_gen.get_functions())
+
+    print(assembly_code)
     # print(f"Assembly code:\n{assembly_code}")
     executable = assemble_and_get_executable(assembly_code)
     return executable
