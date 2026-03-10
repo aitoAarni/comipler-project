@@ -1,6 +1,31 @@
 # Compiler project
 [Compiler's course page](https://hy-compilers.github.io/spring-2026/)
+```
+# Some code for the language
+fun square(x: Int): Int {
+    return x * x;
+}
 
+fun vec_len_squared(x: Int, y: Int): Int {
+    return square(x) + square(y);
+}
+
+fun print_int_twice(x: Int): Unit {
+    print_int(x);
+    print_int(x);
+}
+var n: Int = read_int();
+print_int(n);
+while n > 1 do {
+    if n % 2 == 0 then {
+        n = n / 2;
+    } else {
+        n = 3*n + 1;
+    }
+    print_int(n);
+}
+print_int_twice(vec_len_squared(3, 4));
+```
 This repo is a compiler that generates machine code for a simple programming language.
 
 ## Setup
