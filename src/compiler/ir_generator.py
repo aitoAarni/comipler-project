@@ -327,11 +327,8 @@ if __name__ == "__main__":
     from compiler.utils import GLOBAL_VARS
 
     code = """
-           fun square(x: Int): Int {
-    return x * x;
-}
-
-square(3)
+           var x = 2;
+var x = 4;
     """
 
     tokens = tokenizer(code)

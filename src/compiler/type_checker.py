@@ -132,14 +132,15 @@ def typecheck_statements(node: ast.Expression | None,
 
         case ast.ContinueStatement():
             return Unit
-        
+
         case ast.ReturnStatement():
             return_val = typecheck_statements(node.return_val, type_table)
-            assert return_val == node.function_return_type, (f"Error {node.location}:"
-            f" return statement type: {node.function_return_type} should be of the same "
-            f"type as function return type: {return_val}")
+            assert return_val == node.function_return_type, (f"Error "
+                 f"{node.location}:" 
+                 f" return statement type: "
+                f"{node.function_return_type} should be of the same "
+                  f"type as function return type: {return_val}")
             return return_val
-
 
         case ast.Block():
 
@@ -162,6 +163,9 @@ def typecheck(module: ast.Module,
     return_vals: list[PrimitiveType | FunType] = []
 
     for func in module.functions:
+        assert len(set([param.name for param in func.params])) == len(
+            func.params), (f"Error: function {func.name}" f"has multiple"
+                           f" parameters with the same name")
 
         func_arg_types: list[PrimitiveType] = []
         for arg in func.params:
@@ -182,18 +186,8 @@ def typecheck(module: ast.Module,
 
 if __name__ == "__main__":
     code = """
-fun f(x: Int): Int {
-    return g(x + 1);
-}
-fun g(x: Int): Int {
-    print_int(x);
-    if x < 5 then {
-        return f(x);
-    } else {
-        return x;
-    }
-}
-f(1) * 100
+fun f(x: Int, x: Int): Int { return x+1; }
+f(3, 4)
 """
     tokens = tokenizer(code)
     parsed = parse(tokens)

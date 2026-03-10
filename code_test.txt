@@ -1,11 +1,12 @@
-fun factorial(x: Int): Int {
-    var result = 0;
-    if x > 1 then {
-        result = x * factorial(x - 1);
-    } else {
-        result = 1;
-    }
-    return result;
+fun f(x: Int): Int {
+    return g(x + 1);
 }
-
-factorial(5)
+fun g(x: Int): Int {
+    print_int(x);
+    if x < 5 then {
+        return f(x);
+    } else {
+        return x;
+    }
+}
+f(1) * 100
