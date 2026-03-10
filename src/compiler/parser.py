@@ -213,10 +213,13 @@ class Parser:
             return self.parse_break_statement()
         elif self.peek().text == "continue":
             return self.parse_continue_statement()
+        elif self.peek().text == "return":
+            return self.parse_return_statement()
         else:
             raise Exception(
                 f"Keyowrd "
                 f"{self.peek().text} is not handled in parser")
+    
 
     def parse_if_statement(self) -> ast.TernaryOp:
         self.consume("if")
@@ -248,6 +251,11 @@ class Parser:
     def parse_continue_statement(self) -> ast.ContinueStatement:
         statement = self.consume("continue")
         return ast.ContinueStatement(statement.location)
+
+    def parse_return_statement(self) -> ast.ReturnStatement:
+        return_token = self.consume("return")
+        return_val = self.parse_expression()
+        return ast.ReturnStatement(return_token.location.new(), return_val)
 
     def _parse_variable_type(self) -> FunType | PrimitiveType:
         self.consume(":")
@@ -405,9 +413,10 @@ def check_is_identifier(
 
 if __name__ == "__main__":
     tokens = tokenizer("""
-1+1;
 fun square(x: Int, b: Bool, c: Unit): Int {
-    1+1; 2+2;
+    return 1;
+1+1;
+return 4 / 3
 }
 """)
     parsed = parse(tokens)

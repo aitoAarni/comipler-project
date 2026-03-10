@@ -34,6 +34,10 @@ class Module:
 class Literal(Expression):
     value: int | bool | None
 
+@dataclass
+class ReturnStatement(Expression):
+    return_val: Expression
+
 
 @dataclass
 class Identifier(Expression):
