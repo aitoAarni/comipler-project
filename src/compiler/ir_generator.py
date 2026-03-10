@@ -17,18 +17,23 @@ class IrGenerator:
         self.func_locals: dict[str, list[IRVar]] = {}
         self.current_loop_start: Label | None = None
         self.current_loop_end: Label | None = None
+        self.functions: list[IRVar] = []
 
-    def get_locals(self) -> list[IRVar]:
+    def get_locals(self) -> dict[str, list[IRVar]]:
         return self.func_locals
+
+    def get_functions(self) -> list[IRVar]:
+        return self.functions
 
     def generate_ir(self) -> dict[str, list[ir.Instruction]]:
         var_unit = IRVar('unit')
 
-        def new_var_generator(locals: list[IRVar] | None = None) -> Generator[IRVar, None, None]:
+        def new_var_generator(
+                locals: list[IRVar] | None = None) -> Generator[IRVar, None, None]:
             num = 1
-            if locals is None: 
+            if locals is None:
                 locals = []
-            assert not locals is None
+            assert locals is not None
             while True:
                 var_name = "x" + str(num) if num != 1 else "x"
                 ir_var = IRVar(var_name)
@@ -42,11 +47,11 @@ class IrGenerator:
 
         ins: list[ir.Instruction] = []
 
-        def visit(st: SymTab[IRVar], expr: ast.Expression) -> IRVar:
+        def visit(st: SymTab[IRVar], expr: ast.Expression |
+                  ast.FunctionDefinition) -> IRVar:
             assert not isinstance(new_var, type(None))
-            loc = expr.location
-            if not loc:
-                raise Exception("Location not defined")
+            loc: Location | None = expr.location if isinstance(
+                expr, ast.Expression) else None
             match expr:
                 case ast.Literal():
                     match expr.value:
@@ -249,42 +254,46 @@ class IrGenerator:
                         visit(block_symbol_table, arg)
                     return visit(block_symbol_table, expr.result_expression)
 
+                case ast.FunctionDefinition():
+                    params = [IRVar(param.name) for param in expr.params]
+                    ins.append(ir.FunctionDefinition(loc, expr.name, params))
+                    visit(st, expr.body)
+                    return var_unit
                 case None:
                     return var_unit
                 case _:
                     raise ValueError("Not implemented")
         user_def_func_names = [
-            func.name for func in self.module.functions if func.name]
+            func.name for func in self.module.functions]
 
         for name in self.reserved_names:
             self.root_symtab.add_symbol(name, IRVar(name))
 
-
         for name in user_def_func_names:
-            self.func_locals[name] = []
             self.root_symtab.add_symbol(name, IRVar(name))
-            for func in user_def_func_names:
-                self.func_locals[name].append(IRVar(func))
+            self.functions.append(IRVar(name))
+
         return_var = {}
-        for func in self.module.functions:
-            if func.name == "main": continue
+        for fun in self.module.functions:
+            self.func_locals[fun.name] = []
+            if fun.name == "main":
+                continue
             sym_tab = SymTab[IRVar](self.root_symtab)
-            for arg in func.params:
+            for arg in fun.params:
                 var = IRVar(arg.name)
                 sym_tab.add_symbol(arg.name, var)
-                self.func_locals[func.name].append(var)
+                self.func_locals[fun.name].append(var)
 
-            new_var = new_var_generator(self.func_locals[func.name])
+            new_var = new_var_generator(self.func_locals[fun.name])
             ins = []
-            visit(sym_tab, func.body)
-            return_var[func.name] = ins
-            
-            
-        ins =  []
+            visit(sym_tab, fun)
+            return_var[fun.name] = ins
+
+        ins = []
         new_var = new_var_generator(self.func_locals["main"])
-        root_expr = self.module.functions[-1].body
+        root_expr = self.module.functions[-1]
         var_final_result = visit(self.root_symtab, root_expr)
-        if root_expr == Int:
+        if root_expr.body == Int:
             r_val = next(new_var)
             ins.append(
                 ir.Call(
@@ -293,7 +302,7 @@ class IrGenerator:
                     [var_final_result],
                     r_val))
 
-        elif root_expr == Bool:
+        elif root_expr.body == Bool:
             r_val = next(new_var)
             ins.append(
                 ir.Call(
@@ -312,12 +321,12 @@ if __name__ == "__main__":
     from compiler.utils import GLOBAL_VARS
 
     code = """
-fun square(x: Int, b: Bool): Int {
-    1+1; 2+2;
-}
-square(2, true);
-var a = 2
-"""
+    fun square(x: Int, b: Int): Int {
+    x+b;
+    }
+    square(2, 3);
+    var a = 2
+    """
 
     tokens = tokenizer(code)
     parsed = parse(tokens)
@@ -328,7 +337,6 @@ var a = 2
         intermediate_representation = ir_gen.generate_ir()
 
         for key, commands in intermediate_representation.items():
-            print("Func:", key)
             for command in commands:
                 print(command)
             print()

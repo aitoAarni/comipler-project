@@ -2,11 +2,13 @@ from dataclasses import dataclass, field
 from compiler.location import Location
 from compiler.types import FunType, PrimitiveType, Unit, Type
 
+
 @dataclass
 class Expression:
     """Base class for AST nodes representing expressions."""
     location: Location | None
     type: Type = field(kw_only=True, default_factory=lambda: Unit)
+
 
 @dataclass
 class FunDefArg:
@@ -19,15 +21,13 @@ class FunctionDefinition:
     name: str
     body: Expression
     params: list[FunDefArg]
-    result_type: PrimitiveType 
+    result_type: PrimitiveType
 
 
 @dataclass
 class Module:
     """The Big Jefe of AST nodes"""
     functions: list[FunctionDefinition]
-
-
 
 
 @dataclass
@@ -102,7 +102,6 @@ class VariableDeclaration(Expression):
     identifier: Identifier
     initializer: Expression
     var_type: PrimitiveType | FunType | None = None
-
 
 @dataclass
 class BreakStatement(Expression):

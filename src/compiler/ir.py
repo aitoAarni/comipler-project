@@ -32,6 +32,17 @@ class Instruction():
         )
         return f'{type(self).__name__}({args})'
 
+@dataclass(frozen=True)
+class FunctionDefinition(Instruction):
+    """Creates a function"""
+    name: IRVar
+    params: list[IRVar]
+
+    def __str__(self):
+        return f"{self.name}({", ".join([param.name for param in self.params])})"
+
+    def __repr__(self):
+        return f"{self.name}({", ".join([param.name for param in self.params])})"
 
 @dataclass(frozen=True)
 class LoadBoolConst(Instruction):
