@@ -37,6 +37,7 @@ class Literal(Expression):
 @dataclass
 class ReturnStatement(Expression):
     return_val: Expression
+    function_return_type: PrimitiveType
 
 
 @dataclass

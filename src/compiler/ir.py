@@ -50,6 +50,10 @@ class LoadBoolConst(Instruction):
     value: bool
     dest: IRVar
 
+@dataclass(frozen=True)
+class Return(Instruction):
+    """Returns from function"""
+    return_val: IRVar
 
 @dataclass(frozen=True)
 class Label(Instruction):

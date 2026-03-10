@@ -17,6 +17,7 @@ class Parser:
         self.tokens = tokens
         self.pos = 0
         self.token_length = len(tokens)
+        self.current_func_return_type: PrimitiveType = Unit
         # allow only on top-level or in inside blocks {}
         self.allow_var_declaration = False
 
@@ -219,7 +220,6 @@ class Parser:
             raise Exception(
                 f"Keyowrd "
                 f"{self.peek().text} is not handled in parser")
-    
 
     def parse_if_statement(self) -> ast.TernaryOp:
         self.consume("if")
@@ -255,7 +255,10 @@ class Parser:
     def parse_return_statement(self) -> ast.ReturnStatement:
         return_token = self.consume("return")
         return_val = self.parse_expression()
-        return ast.ReturnStatement(return_token.location.new(), return_val)
+        return ast.ReturnStatement(
+            return_token.location.new(),
+            return_val,
+            self.current_func_return_type)
 
     def _parse_variable_type(self) -> FunType | PrimitiveType:
         self.consume(":")
@@ -369,7 +372,10 @@ class Parser:
         self.consume(":")
         result_type = convert_token_to_type(
             self.consume(["Int", "Bool", "Unit"]))
+        fun_type_before = self.current_func_return_type
+        self.current_func_return_type = result_type
         func_body = self.parse_block()
+        self.current_func_return_type = fun_type_before
         return ast.FunctionDefinition(
             func_name, func_body, func_params, result_type)
 

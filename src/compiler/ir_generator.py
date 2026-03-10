@@ -5,7 +5,6 @@ from compiler.ir import IRVar, Label
 from compiler.utils import create_top_level_type_symbol_table
 from typing import Generator
 from compiler.location import Location
-import dataclasses
 from pprint import pprint
 
 
@@ -248,6 +247,10 @@ class IrGenerator:
                             return_val))
                     return return_val
 
+                case ast.ReturnStatement():
+                    return_val = visit(st, expr.return_val)
+                    ins.append(ir.Return(loc, return_val))
+
                 case ast.Block():
                     block_symbol_table = SymTab[IRVar](st)
                     for arg in expr.statements:
@@ -321,11 +324,11 @@ if __name__ == "__main__":
     from compiler.utils import GLOBAL_VARS
 
     code = """
-    fun square(x: Int, b: Int): Int {
-    x+b;
+       fun square(): Int {
+    var x = 3;
+    return 3 - x;
     }
-    square(2, 3);
-    var a = 2
+    square();
     """
 
     tokens = tokenizer(code)
