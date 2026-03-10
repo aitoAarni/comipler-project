@@ -1,3 +1,7 @@
+# Compiler project
+[Compiler's course page](https://hy-compilers.github.io/spring-2026/)
+
+This repo is a compiler that generates machine code for a simple programming language.
 
 ## Setup
 
